@@ -551,7 +551,7 @@ export default function Home() {
 
   return (
     <div
-      className="h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]"
+      className="h-screen flex flex-col app-backdrop text-[var(--foreground)]"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -570,9 +570,9 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 bg-[var(--card-bg)] border-b border-[var(--border-color)] px-6 py-4 flex items-center justify-between z-10 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+      <header className="flex-shrink-0 bg-[var(--card-bg)]/88 backdrop-blur-xl border-b border-[var(--border-color)] px-4 sm:px-6 py-3.5 flex items-center justify-between z-10 shadow-[0_8px_26px_-24px_rgba(15,23,42,0.55)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#090b11] border border-gray-800 flex-shrink-0 shadow-md">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#090b11] border border-gray-800 flex-shrink-0 shadow-[0_10px_24px_-18px_rgba(229,9,20,0.8)]">
             <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="netflix-red-1" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -600,14 +600,14 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="flex items-baseline">
-                <span className="text-xl font-black tracking-tighter text-[#E50914] font-sans">
+              <span className="text-xl font-black tracking-normal text-[#E50914] font-sans">
                   DOC
                 </span>
-                <span className="text-xl font-black tracking-tighter text-gray-800 dark:text-gray-100 font-sans ml-0.5">
+              <span className="text-xl font-black tracking-normal text-gray-800 dark:text-gray-100 font-sans ml-0.5">
                   FLIX
                 </span>
               </h1>
-              <span className="hidden sm:inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
+              <span className="hidden sm:inline-block text-[11px] font-semibold px-2 py-0.5 rounded-md bg-red-500/10 text-red-600 dark:text-red-300 border border-red-500/20">
                 {locale === 'zh' ? '智能文档' : 'AI Doc'}
               </span>
               <div className={`w-2.5 h-2.5 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
@@ -617,43 +617,42 @@ export default function Home() {
         <div className="flex items-center gap-2 sm:gap-3">
 
           {tokenUsage.input > 0 && (
-            <span className="hidden sm:inline-block text-xs px-2.5 py-1.5 rounded-xl font-mono nm-pressed border border-[var(--border-color)] text-gray-600 dark:text-gray-300">
+            <span className="hidden sm:inline-block text-xs px-2.5 py-1.5 rounded-lg font-mono nm-pressed border border-[var(--border-color)] text-gray-600 dark:text-gray-300">
               {(tokenUsage.input + tokenUsage.output).toLocaleString()} tokens
             </span>
           )}
           {/* Toggle Workspace Button (Visible only on mobile/tablet) */}
           <button
             onClick={() => setWorkspaceOpen(!workspaceOpen)}
-            className={`lg:hidden flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-xl transition-all border border-[var(--border-color)] nm-button ${workspaceOpen ? 'active text-blue-500' : 'text-gray-600 dark:text-gray-300 dark:text-gray-300'}`}
+            className={`lg:hidden min-h-11 flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all border border-[var(--border-color)] nm-button ${workspaceOpen ? 'active text-blue-500' : 'text-gray-600 dark:text-gray-300'}`}
           >
             📂 {files.length > 0 ? `${files.length}` : '文件'}
           </button>
           <button onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-            className="px-3 py-1.5 text-sm font-semibold rounded-xl transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300 dark:text-gray-300">
+            className="min-h-11 px-3 py-2 text-sm font-semibold rounded-lg transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300">
             {locale === 'zh' ? 'EN' : '中文'}
           </button>
           <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="px-3 py-1.5 text-sm font-semibold rounded-xl transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300 dark:text-gray-300">
+            className="min-h-11 px-3 py-2 text-sm font-semibold rounded-lg transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300">
             {isDark ? '☀️' : '🌙'}
           </button>
         </div>
       </header>
 
       {/* Main Panel */}
-      <main className="flex-1 flex overflow-hidden p-4 sm:p-6 bg-[var(--background)]">
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1600px] w-full mx-auto h-full overflow-hidden relative">
+      <main className="flex-1 flex overflow-hidden p-3 sm:p-5 bg-transparent">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 max-w-[1600px] w-full mx-auto h-full overflow-hidden relative">
           
           {/* Left Column: File Workspace */}
           <div className={`${
             workspaceOpen 
               ? 'absolute inset-0 z-20 flex bg-[var(--background)]' 
               : 'hidden lg:flex'
-          } lg:col-span-4 xl:col-span-3 flex-col nm-flat rounded-2xl p-5 border border-[var(--border-color)] overflow-hidden h-full`}>
+          } lg:col-span-4 xl:col-span-3 flex-col nm-flat rounded-xl p-4 border border-[var(--border-color)] overflow-hidden h-full`}>
             
             {/* Sidebar header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)] mb-4 flex-shrink-0">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)] mb-4 flex-shrink-0">
               <div className="flex items-center gap-2">
-                <span className="text-lg">📁</span>
                 <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200">
                   {locale === 'zh' ? '文件控制中心' : 'File Workspace'}
                 </h2>
@@ -674,9 +673,9 @@ export default function Home() {
             {/* Compact Drag & Drop Upload Zone */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="group nm-pressed rounded-xl p-5 border border-dashed border-gray-300 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer flex flex-col items-center gap-2 text-center transition-all mb-4 hover:scale-[0.99] active:scale-[0.98] flex-shrink-0"
+              className="group nm-pressed rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700/70 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer flex flex-col items-center gap-2 text-center transition-all mb-4 active:scale-[0.99] flex-shrink-0"
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center nm-flat border border-[var(--border-color)] text-gray-400 group-hover:text-blue-500 transition-colors">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center nm-flat border border-[var(--border-color)] text-gray-400 group-hover:text-blue-500 transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
@@ -713,7 +712,7 @@ export default function Home() {
                   return (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between p-3 rounded-xl nm-flat border border-[var(--border-color)] hover:scale-[1.01] transition-transform"
+                      className="flex items-center justify-between p-3 rounded-xl nm-flat border border-[var(--border-color)] hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-colors"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-lg flex-shrink-0">{getFileIcon(file.type)}</span>
@@ -721,7 +720,7 @@ export default function Home() {
                           <p className="text-sm font-bold truncate text-gray-800 dark:text-gray-200">
                             {file.name}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-450">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             {file.size}
                           </p>
                         </div>
@@ -850,9 +849,9 @@ export default function Home() {
                             key={idx}
                             onClick={() => sendMessage(item.cmd)}
                             disabled={isProcessing}
-                            className="p-4 text-left rounded-2xl border border-[var(--border-color)] nm-flat hover:scale-[1.01] transition-all group flex flex-col justify-between text-sm"
+                            className="p-4 text-left rounded-2xl border border-[var(--border-color)] nm-flat hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-colors group flex flex-col justify-between text-sm"
                           >
-                            <p className="text-xs font-bold text-gray-800 dark:text-gray-800 dark:text-gray-205 group-hover:text-blue-500 transition-colors">
+                            <p className="text-xs font-bold text-gray-800 dark:text-gray-250 dark:text-gray-200 group-hover:text-blue-500 transition-colors">
                               {item.title}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
@@ -947,7 +946,7 @@ export default function Home() {
                                   key={action.id}
                                   onClick={() => sendMessage(action.title)}
                                   disabled={isProcessing}
-                                  className="text-left px-4 py-3 rounded-2xl border border-[var(--border-color)] nm-flat hover:scale-[1.01] transition-all disabled:opacity-50"
+                                  className="text-left px-4 py-3 rounded-2xl border border-[var(--border-color)] nm-flat hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-colors disabled:opacity-50"
                                 >
                                   <div className="flex items-start gap-3">
                                     <span className="text-base flex-shrink-0 mt-0.5">{action.emoji}</span>
@@ -1011,7 +1010,7 @@ export default function Home() {
                         <a key={entry.id}
                           href={`data:application/octet-stream;base64,${entry.meta?.base64 || ''}`}
                           download={entry.content}
-                          className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-[var(--border-color)] nm-flat hover:scale-[1.01] transition-all hover:bg-emerald-500/5">
+                          className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-[var(--border-color)] nm-flat hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-colors">
                           <svg className="w-4 h-4 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
