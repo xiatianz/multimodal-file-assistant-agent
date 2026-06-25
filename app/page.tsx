@@ -83,13 +83,13 @@ function ThinkingPanel({
           <span className="w-3 h-3 rounded-full border-2 border-blue-400 border-t-transparent animate-spin flex-shrink-0" />
         ) : (
           <svg
-            className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'} text-gray-400 dark:text-gray-500`}
+            className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'} text-gray-400 dark:text-gray-400`}
             fill="none" viewBox="0 0 24 24" stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         )}
-        <span className="font-medium text-gray-500 dark:text-gray-400">
+        <span className="font-medium text-gray-500 dark:text-gray-300">
           {isLive
             ? (isZh ? '处理中...' : 'Processing...')
             : stepCount > 0
@@ -653,7 +653,7 @@ export default function Home() {
             {/* Sidebar header */}
             <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)] mb-4 flex-shrink-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100">
                   {locale === 'zh' ? '文件控制中心' : 'File Workspace'}
                 </h2>
               </div>
@@ -684,7 +684,7 @@ export default function Home() {
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 block group-hover:text-blue-500 transition-colors">
                   {locale === 'zh' ? '上传文档/表格/图片' : 'Upload Files'}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">
+                <span className="text-xs text-gray-500 dark:text-gray-300 block mt-0.5">
                   {locale === 'zh' ? '拖拽或点击浏览' : 'Drag & drop or click'}
                 </span>
               </div>
@@ -695,7 +695,7 @@ export default function Home() {
               {files.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-4">
                   <span className="text-3xl mb-2 opacity-40">📊</span>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-gray-500 dark:text-gray-300">
                     {locale === 'zh' ? '工作区暂无文件' : 'No files in workspace'}
                   </p>
                   <button
@@ -717,10 +717,10 @@ export default function Home() {
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-lg flex-shrink-0">{getFileIcon(file.type)}</span>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold truncate text-gray-800 dark:text-gray-200">
+                          <p className="text-sm font-bold truncate text-gray-800 dark:text-gray-100">
                             {file.name}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-gray-500 dark:text-gray-300">
                             {file.size}
                           </p>
                         </div>
@@ -811,7 +811,7 @@ export default function Home() {
                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">
                       {locale === 'zh' ? 'DocFlix 智能多模态文档助理' : 'DocFlix Smart Doc Assistant'}
                     </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mb-8 leading-relaxed">
                       {locale === 'zh' 
                         ? '您好！我是您的智能文档处理助手。请在左侧添加文档（支持 PDF、Word、Excel、Markdown、CSV、图片及音视频），然后在这里输入分析、转换或合并指令。'
                         : 'Hello! I am your AI Document Agent. Upload files on the left and enter analysis, conversion or merge commands below.'}
@@ -819,7 +819,7 @@ export default function Home() {
 
                     {/* Quick Command Chips */}
                     <div className="w-full space-y-3 text-left">
-                      <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-1">
+                      <p className="text-sm font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider pl-1">
                         {locale === 'zh' ? '💡 常用指令推荐' : '💡 Recommended Commands'}
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -851,10 +851,10 @@ export default function Home() {
                             disabled={isProcessing}
                             className="p-4 text-left rounded-2xl border border-[var(--border-color)] nm-flat hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-colors group flex flex-col justify-between text-sm"
                           >
-                            <p className="text-xs font-bold text-gray-800 dark:text-gray-250 dark:text-gray-200 group-hover:text-blue-500 transition-colors">
+                            <p className="text-xs font-bold text-gray-800 dark:text-gray-250 dark:text-gray-100 group-hover:text-blue-500 transition-colors">
                               {item.title}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                            <p className="text-xs text-gray-500 dark:text-gray-300 mt-1 leading-snug">
                               {item.desc}
                             </p>
                           </button>
@@ -870,7 +870,7 @@ export default function Home() {
                       if (steps.length === 0) return null;
                       return (
                         <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
-                          <span className="text-xs font-mono mt-3 w-14 flex-shrink-0 text-gray-500 dark:text-gray-400">{timeStr(entry.timestamp)}</span>
+                          <span className="text-xs font-mono mt-3 w-14 flex-shrink-0 text-gray-500 dark:text-gray-300">{timeStr(entry.timestamp)}</span>
                           <div className="flex-1 min-w-0">
                             <ThinkingPanel
                               steps={steps}
@@ -895,7 +895,7 @@ export default function Home() {
                     if (entry.type === 'retry_card') {
                       return (
                         <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
-                          <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-400">{timeStr(entry.timestamp)}</span>
+                          <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-300">{timeStr(entry.timestamp)}</span>
                           <div className="flex-1 rounded-2xl border p-4 bg-red-50 dark:bg-red-950/15 border-red-200 dark:border-red-800/30">
                             <p className="text-xs mb-3 text-red-600 dark:text-red-300">
                               ⚠️ {entry.content}
@@ -915,7 +915,7 @@ export default function Home() {
                     // ── Standard entries ──
                     return (
                       <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
-                        <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-400">{timeStr(entry.timestamp)}</span>
+                        <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-300">{timeStr(entry.timestamp)}</span>
 
                         {entry.type === 'user' && (
                           <>
@@ -952,7 +952,7 @@ export default function Home() {
                                     <span className="text-base flex-shrink-0 mt-0.5">{action.emoji}</span>
                                     <div className="min-w-0">
                                       <p className={`text-xs font-bold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{action.title}</p>
-                                      <p className={`text-[10px] mt-0.5 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{action.description}</p>
+                                      <p className={`text-[10px] mt-0.5 leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>{action.description}</p>
                                     </div>
                                   </div>
                                 </button>
@@ -1015,9 +1015,9 @@ export default function Home() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
                           <div className="min-w-0">
-                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate block">{entry.content}</span>
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate block">{entry.content}</span>
                             {entry.meta?.description && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 block truncate mt-0.5">{entry.meta.description}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-300 block truncate mt-0.5">{entry.meta.description}</span>
                             )}
                           </div>
                         </a>
