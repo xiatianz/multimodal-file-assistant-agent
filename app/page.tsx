@@ -249,7 +249,7 @@ export default function Home() {
   const [userInput, setUserInput] = useState('');
   const [conversationId] = useState(() => crypto.randomUUID());
   const [tokenUsage, setTokenUsage] = useState({ input: 0, output: 0 });
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
