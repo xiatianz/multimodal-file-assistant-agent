@@ -73,31 +73,31 @@ function ThinkingPanel({
   const stepCount = steps.length;
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-750/50 bg-gray-50/90 dark:bg-gray-900/50 overflow-hidden text-xs">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-inset)] overflow-hidden text-xs">
       {/* Header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-gray-100/80 dark:hover:bg-gray-800/40"
+        className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[var(--bg-elevated)]"
       >
         {isLive ? (
-          <span className="w-3 h-3 rounded-full border-2 border-blue-400 border-t-transparent animate-spin flex-shrink-0" />
+          <span className="w-3 h-3 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin flex-shrink-0" />
         ) : (
           <svg
-            className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'} text-gray-400 dark:text-gray-400`}
+            className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'} text-[var(--text-tertiary)]`}
             fill="none" viewBox="0 0 24 24" stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         )}
-        <span className="font-medium text-gray-500 dark:text-gray-300">
+        <span className="font-medium text-[var(--text-secondary)]">
           {isLive
             ? (isZh ? '处理中...' : 'Processing...')
             : stepCount > 0
-              ? (isZh ? `思考过程 · ${stepCount} 步操作` : `Thinking · ${stepCount} steps`)
+              ? (isZh ? `思考过程 · ${stepCount} 步` : `Thinking · ${stepCount} steps`)
               : (isZh ? '思考过程' : 'Thinking')}
         </span>
         {!isLive && stepCount > 0 && (
-          <span className="ml-auto text-gray-400 dark:text-gray-600">
+          <span className="ml-auto text-[var(--text-tertiary)]">
             {collapsed ? '▼' : '▲'}
           </span>
         )}
@@ -105,11 +105,11 @@ function ThinkingPanel({
 
       {/* Steps */}
       {!collapsed && (
-        <div className="border-t border-gray-100 dark:border-gray-700/40">
+        <div className="border-t border-[var(--border-subtle)]">
           <div className="px-3 py-2.5 space-y-1.5">
             {steps.map((step, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className={`flex-shrink-0 px-1 py-0.5 rounded text-[10px] font-medium mt-0.5 ${
+                <span className={`flex-shrink-0 px-1 py-0.5 rounded text-[10px] font-bold mt-0.5 ${
                   step.type === 'error'
                     ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300'
                     : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
@@ -124,9 +124,9 @@ function ThinkingPanel({
               </div>
             ))}
             {isLive && (
-              <div className="flex items-center gap-1.5 pt-0.5 text-gray-400 dark:text-gray-600">
+              <div className="flex items-center gap-1.5 pt-0.5 text-[var(--text-tertiary)]">
                 <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
-                <span>{isZh ? '等待下一步操作...' : 'Waiting for next action...'}</span>
+                <span>{isZh ? '等待下一步...' : 'Waiting...'}</span>
               </div>
             )}
           </div>
@@ -559,7 +559,7 @@ export default function Home() {
     >
       {/* Drag overlay */}
       {isDragging && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none border-2 border-dashed rounded-lg m-3 bg-blue-50/90 dark:bg-slate-900/90 border-blue-400 dark:border-blue-500/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none border-2 border-dashed rounded-2xl m-3 bg-[var(--accent-subtle)]/80 border-[var(--accent)]/40 backdrop-blur-md">
           <div className="text-center">
             <div className="text-4xl mb-2">📂</div>
             <p className="text-sm font-semibold text-blue-500">
@@ -570,140 +570,142 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 bg-[var(--card-bg)]/88 backdrop-blur-xl border-b border-[var(--border-color)] px-4 sm:px-6 py-3.5 flex items-center justify-between z-10 shadow-[0_8px_26px_-24px_rgba(15,23,42,0.55)]">
+      <header className="flex-shrink-0 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] px-4 sm:px-6 py-2.5 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#090b11] border border-gray-800 flex-shrink-0 shadow-[0_10px_24px_-18px_rgba(229,9,20,0.8)]">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#E50914] to-[#9C070F] flex-shrink-0 shadow-[0_2px_8px_rgba(229,9,20,0.3)]">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="netflix-red-1" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#E50914" />
-                  <stop offset="100%" stopColor="#9C070F" />
+                <linearGradient id="logo-d-bar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="100%" stopColor="#dce3ee" />
                 </linearGradient>
-                <linearGradient id="netflix-red-2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#F51522" />
-                  <stop offset="50%" stopColor="#E50914" />
-                  <stop offset="100%" stopColor="#B81D24" />
+                <linearGradient id="logo-d-loop" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="100%" stopColor="#a4b8d4" />
                 </linearGradient>
-                <linearGradient id="netflix-red-3" x1="100%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#E50914" />
-                  <stop offset="100%" stopColor="#7A050B" />
+                <linearGradient id="logo-d-inner" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ff4d4d" />
+                  <stop offset="100%" stopColor="#990000" />
                 </linearGradient>
-                <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-                  <feDropShadow dx="-1" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.6"/>
+                <filter id="logo-d-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="-1" dy="1.5" stdDeviation="1" floodColor="#000000" floodOpacity="0.45" />
                 </filter>
               </defs>
-              <path d="M7 4H12V28H7V4Z" fill="url(#netflix-red-1)" />
-              <path d="M12 4C20.5 4 26 9.5 26 16C26 22.5 20.5 28 12 28H15C21.5 28 26 22.5 26 16C26 9.5 21.5 4 15 4H12Z" fill="url(#netflix-red-2)" filter="url(#shadow)" />
-              <path d="M12 4H10C17.5 4 23 9.5 23 16C23 22.5 17.5 28 10 28H12C19.5 28 25 22.5 25 16C25 9.5 19.5 4 12 4Z" fill="url(#netflix-red-3)" opacity="0.85" />
+              <path d="M7 4 H12.5 V28 H7 Z" fill="url(#logo-d-bar)" />
+              <path d="M12.5 9.5 C15.5 9.5 17.5 11.5 17.5 16 C17.5 20.5 15.5 22.5 12.5 22.5 L12.5 28 C20.5 28 23 22 23 16 C23 10 20.5 4 12.5 4 Z" fill="url(#logo-d-inner)" />
+              <path d="M12.5 4 C20.5 4 27 9.4 27 16 C27 22.6 20.5 28 12.5 28 L12.5 22.5 C17.5 22.5 21.5 20 21.5 16 C 21.5 12 17.5 9.5 12.5 9.5 Z" fill="url(#logo-d-loop)" filter="url(#logo-d-shadow)" />
             </svg>
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="flex items-baseline">
-              <span className="text-xl font-black tracking-normal text-[#E50914] font-sans">
-                  DOC
-                </span>
-              <span className="text-xl font-black tracking-normal text-gray-800 dark:text-gray-100 font-sans ml-0.5">
-                  FLIX
-                </span>
+                <span className="text-lg font-black tracking-tight text-[var(--brand)] font-sans">DOC</span>
+                <span className="text-lg font-black tracking-tight text-[var(--text-primary)] font-sans ml-0.5">FLIX</span>
               </h1>
-              <span className="hidden sm:inline-block text-[11px] font-semibold px-2 py-0.5 rounded-md bg-red-500/10 text-red-600 dark:text-red-300 border border-red-500/20">
-                {locale === 'zh' ? '智能文档' : 'AI Doc'}
+              <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/15 uppercase tracking-wider">
+                {locale === 'zh' ? 'AI' : 'AI'}
               </span>
-              <div className={`w-2.5 h-2.5 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+              <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'}`} />
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {tokenUsage.input > 0 && (
-            <span className="hidden sm:inline-block text-xs px-2.5 py-1.5 rounded-lg font-mono nm-pressed border border-[var(--border-color)] text-gray-600 dark:text-gray-300">
-              {(tokenUsage.input + tokenUsage.output).toLocaleString()} tokens
+            <span className="hidden sm:inline-block text-[11px] px-2.5 py-1 rounded-full font-mono bg-[var(--bg-inset)] border border-[var(--border-subtle)] text-[var(--text-tertiary)]">
+              {(tokenUsage.input + tokenUsage.output).toLocaleString()} tk
             </span>
           )}
-          {/* Toggle Workspace Button (Visible only on mobile/tablet) */}
           <button
             onClick={() => setWorkspaceOpen(!workspaceOpen)}
-            className={`lg:hidden min-h-11 flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all border border-[var(--border-color)] nm-button ${workspaceOpen ? 'active text-blue-500' : 'text-gray-600 dark:text-gray-300'}`}
+            className={`lg:hidden min-h-9 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all nm-button ${workspaceOpen ? 'active text-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}
           >
-            📂 {files.length > 0 ? `${files.length}` : '文件'}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+            {files.length > 0 ? `${files.length}` : locale === 'zh' ? '文件' : 'Files'}
           </button>
           <button onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-            className="min-h-11 px-3 py-2 text-sm font-semibold rounded-lg transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300">
-            {locale === 'zh' ? 'EN' : '中文'}
+            className="min-h-9 w-9 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-secondary)] text-xs font-bold">
+            {locale === 'zh' ? 'EN' : '中'}
           </button>
           <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="min-h-11 px-3 py-2 text-sm font-semibold rounded-lg transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300">
-            {isDark ? '☀️' : '🌙'}
+            className="min-h-9 w-9 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-secondary)]">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {isDark
+                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              }
+            </svg>
           </button>
         </div>
       </header>
 
       {/* Main Panel */}
-      <main className="flex-1 flex overflow-hidden p-3 sm:p-5 bg-transparent">
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 max-w-[1600px] w-full mx-auto h-full overflow-hidden relative">
-          
+      <main className="flex-1 flex overflow-hidden p-3 sm:p-4 bg-transparent">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 max-w-[1600px] w-full mx-auto h-full overflow-hidden relative">
+
           {/* Left Column: File Workspace */}
           <div className={`${
-            workspaceOpen 
-              ? 'absolute inset-0 z-20 flex bg-[var(--background)]' 
+            workspaceOpen
+              ? 'absolute inset-0 z-20 flex bg-[var(--bg-base)]'
               : 'hidden lg:flex'
-          } lg:col-span-4 xl:col-span-3 flex-col nm-flat rounded-xl p-4 border border-[var(--border-color)] overflow-hidden h-full`}>
-            
+          } lg:col-span-4 xl:col-span-3 flex-col nm-flat rounded-2xl overflow-hidden h-full`}>
+
             {/* Sidebar header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)] mb-4 flex-shrink-0">
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border-subtle)] flex-shrink-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100">
-                  {locale === 'zh' ? '文件控制中心' : 'File Workspace'}
+                <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+                <h2 className="text-sm font-bold text-[var(--text-primary)]">
+                  {locale === 'zh' ? '文件空间' : 'Workspace'}
                 </h2>
+                {files.length > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[var(--accent-subtle)] text-[var(--accent)]">{files.length}</span>
+                )}
               </div>
               {files.length > 0 && (
                 <button
-                  onClick={() => {
-                    setFiles([]);
-                    sentFileIds.current.clear();
-                  }}
-                  className="text-xs text-red-500 hover:text-red-600 font-medium px-2 py-1 rounded-lg transition-colors hover:bg-red-500/10"
+                  onClick={() => { setFiles([]); sentFileIds.current.clear(); }}
+                  className="text-[11px] text-red-500 hover:text-red-600 font-semibold px-2 py-1 rounded-md transition-colors hover:bg-red-500/8 dark:hover:bg-red-500/15"
                 >
                   {locale === 'zh' ? '清空' : 'Clear'}
                 </button>
               )}
             </div>
 
-            {/* Compact Drag & Drop Upload Zone */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="group nm-pressed rounded-xl p-5 border border-dashed border-slate-300 dark:border-slate-700/70 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer flex flex-col items-center gap-2 text-center transition-all mb-4 active:scale-[0.99] flex-shrink-0"
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center nm-flat border border-[var(--border-color)] text-gray-400 group-hover:text-blue-500 transition-colors">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-              </div>
-              <div>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 block group-hover:text-blue-500 transition-colors">
-                  {locale === 'zh' ? '上传文档/表格/图片' : 'Upload Files'}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-300 block mt-0.5">
-                  {locale === 'zh' ? '拖拽或点击浏览' : 'Drag & drop or click'}
-                </span>
+            {/* Upload Zone */}
+            <div className="px-4 pt-4 pb-2 flex-shrink-0">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="group rounded-xl p-5 border-2 border-dashed border-[var(--border-default)] hover:border-[var(--accent)]/40 dark:hover:border-[var(--accent)]/30 cursor-pointer flex flex-col items-center gap-2.5 text-center transition-all active:scale-[0.98]"
+              >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--accent-subtle)] text-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-white transition-all duration-200">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-sm font-semibold text-[var(--text-primary)] block group-hover:text-[var(--accent)] transition-colors">
+                    {locale === 'zh' ? '上传文件' : 'Upload Files'}
+                  </span>
+                  <span className="text-[11px] text-[var(--text-tertiary)] block mt-0.5">
+                    {locale === 'zh' ? '拖拽或点击 · PDF/Word/Excel/图片/音视频' : 'Drag & drop · PDF, Word, Excel, Images, Media'}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* File list scrollarea */}
-            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+            {/* File list */}
+            <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-2">
               {files.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                  <span className="text-3xl mb-2 opacity-40">📊</span>
-                  <p className="text-sm text-gray-500 dark:text-gray-300">
-                    {locale === 'zh' ? '工作区暂无文件' : 'No files in workspace'}
+                <div className="h-full flex flex-col items-center justify-center text-center py-8">
+                  <span className="text-3xl mb-3 opacity-30">📂</span>
+                  <p className="text-sm text-[var(--text-tertiary)]">
+                    {locale === 'zh' ? '暂无文件' : 'No files yet'}
                   </p>
                   <button
                     onClick={loadSamples}
                     disabled={isProcessing}
-                    className="mt-4 px-4 py-2 text-sm font-semibold rounded-xl border border-[var(--border-color)] nm-button text-blue-500 hover:text-blue-600 active:scale-95 disabled:opacity-50"
+                    className="mt-4 px-4 py-2 text-xs font-semibold rounded-lg nm-button text-[var(--accent)] disabled:opacity-50"
                   >
-                    {locale === 'zh' ? '导入示例文件' : 'Import Samples'}
+                    {locale === 'zh' ? '加载示例' : 'Load Samples'}
                   </button>
                 </div>
               ) : (
@@ -712,44 +714,39 @@ export default function Home() {
                   return (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between p-3 rounded-xl nm-flat border border-[var(--border-color)] hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-inset)] border border-[var(--border-subtle)] hover:border-[var(--accent)]/25 transition-colors group"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-lg flex-shrink-0">{getFileIcon(file.type)}</span>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-base flex-shrink-0">{getFileIcon(file.type)}</span>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold truncate text-gray-800 dark:text-gray-100">
+                          <p className="text-[13px] font-semibold truncate text-[var(--text-primary)]">
                             {file.name}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-300">
+                          <p className="text-[11px] text-[var(--text-tertiary)]">
                             {file.size}
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        {/* Status badges */}
                         {file.status === 'processing' ? (
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
                         ) : isQueued ? (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent)]">
                             {locale === 'zh' ? '待发送' : 'Queued'}
                           </span>
                         ) : (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                            {locale === 'zh' ? '已分析' : 'Loaded'}
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">
+                            {locale === 'zh' ? '已就绪' : 'Ready'}
                           </span>
                         )}
 
                         <button
-                          onClick={() => {
-                            setFiles((prev) => prev.filter((f) => f.id !== file.id));
-                            sentFileIds.current.delete(file.id);
-                          }}
-                          title={locale === 'zh' ? '移除文件' : 'Remove file'}
-                          className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                          onClick={() => { setFiles((prev) => prev.filter((f) => f.id !== file.id)); sentFileIds.current.delete(file.id); }}
+                          className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
@@ -759,104 +756,109 @@ export default function Home() {
               )}
             </div>
 
-            {/* Bottom Action buttons */}
+            {/* Bottom Actions */}
             {files.length > 0 && (
-              <div className="pt-4 border-t border-[var(--border-color)] mt-4 space-y-2 flex-shrink-0">
+              <div className="px-4 py-3.5 border-t border-[var(--border-subtle)] space-y-2 flex-shrink-0">
                 <button
                   onClick={() => sendMessage(t.suggestPrompt, true)}
                   disabled={isProcessing || !files.some(f => !sentFileIds.current.has(f.id))}
-                  className="w-full py-2.5 text-xs font-bold rounded-xl transition-all nm-button-primary disabled:opacity-50 disabled:pointer-events-none"
+                  className="w-full py-2.5 text-xs font-bold rounded-xl nm-button-primary disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  🚀 {locale === 'zh' ? '开始分析新上传文件' : 'Analyze Queue'}
+                  {locale === 'zh' ? '开始分析' : 'Analyze Files'}
                 </button>
                 {files.every(f => sentFileIds.current.has(f.id)) && (
                   <button
                     onClick={loadSamples}
                     disabled={isProcessing}
-                    className="w-full py-2.5 text-sm font-semibold rounded-xl transition-all nm-button border border-[var(--border-color)] text-gray-600 dark:text-gray-300"
+                    className="w-full py-2 text-xs font-semibold rounded-lg nm-button text-[var(--text-secondary)] disabled:opacity-50"
                   >
-                    🔄 {locale === 'zh' ? '导入更多示例文件' : 'Import Samples'}
+                    {locale === 'zh' ? '+ 导入示例文件' : '+ Load Samples'}
                   </button>
                 )}
               </div>
             )}
 
-            {/* Close Mobile Workspace overlay */}
+            {/* Close Mobile Workspace */}
             {workspaceOpen && (
               <button
                 onClick={() => setWorkspaceOpen(false)}
-                className="mt-4 w-full py-2.5 text-sm font-semibold rounded-xl border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300 lg:hidden flex-shrink-0"
+                className="mx-4 mb-4 py-2.5 text-xs font-semibold rounded-lg nm-button text-[var(--text-secondary)] lg:hidden flex-shrink-0"
               >
-                {locale === 'zh' ? '返回对话控制台' : 'Back to Chat'}
+                {locale === 'zh' ? '返回对话' : 'Back to Chat'}
               </button>
             )}
           </div>
 
           {/* Right Column: Chat Window */}
-          <div className="lg:col-span-8 xl:col-span-9 flex flex-col nm-flat rounded-2xl p-5 border border-[var(--border-color)] overflow-hidden h-full">
-            
+          <div className="lg:col-span-8 xl:col-span-9 flex flex-col nm-flat rounded-2xl overflow-hidden h-full">
+
             {/* Activities Scroll Area */}
-            <div className="flex-1 overflow-y-auto space-y-4 pr-1 mb-4 flex flex-col justify-between">
-              
-              <div className="space-y-4 w-full">
+            <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col justify-between">
+
+              <div className="space-y-3.5 w-full">
                 {!hasConversation ? (
-                  // Elegant welcome guide inside chat console
-                  <div className="py-12 px-4 flex flex-col items-center justify-center text-center h-full max-w-2xl mx-auto">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center nm-flat border border-[var(--border-color)] text-blue-500 mb-6 animate-pulse">
-                      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  /* ─── Welcome Screen ─── */
+                  <div className="py-10 px-4 flex flex-col items-center justify-center text-center h-full max-w-2xl mx-auto">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-[var(--accent-subtle)] to-transparent border border-[var(--accent)]/15 mb-5 ${isDark ? 'animate-breathe' : ''}`}>
+                      <svg className="w-7 h-7 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                       </svg>
                     </div>
-                    
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">
-                      {locale === 'zh' ? 'DocFlix 智能多模态文档助理' : 'DocFlix Smart Doc Assistant'}
+
+                    <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+                      {locale === 'zh' ? 'DocFlix 智能文档助理' : 'DocFlix Doc Assistant'}
                     </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-300 mb-8 leading-relaxed">
-                      {locale === 'zh' 
-                        ? '您好！我是您的智能文档处理助手。请在左侧添加文档（支持 PDF、Word、Excel、Markdown、CSV、图片及音视频），然后在这里输入分析、转换或合并指令。'
-                        : 'Hello! I am your AI Document Agent. Upload files on the left and enter analysis, conversion or merge commands below.'}
+                    <p className="text-sm text-[var(--text-secondary)] mb-8 leading-relaxed max-w-md">
+                      {locale === 'zh'
+                        ? '上传文档、表格或图片，输入指令即可让 AI 帮你分析、转换、合并。'
+                        : 'Upload docs, spreadsheets or images, then tell the AI what to do.'}
                     </p>
 
-                    {/* Quick Command Chips */}
+                    {/* Quick Command Cards */}
                     <div className="w-full space-y-3 text-left">
-                      <p className="text-sm font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider pl-1">
-                        {locale === 'zh' ? '💡 常用指令推荐' : '💡 Recommended Commands'}
+                      <p className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest pl-1">
+                        {locale === 'zh' ? '快速指令' : 'Quick Actions'}
                       </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                         {[
                           {
-                            title: locale === 'zh' ? '📊 推荐处理方案' : '📊 Suggest plans',
-                            desc: locale === 'zh' ? '自动检查左侧已载入的文件，给出最佳分析和处理方案' : 'Check files and suggest analytical actions',
-                            cmd: locale === 'zh' ? '我上传了这些文件，请分析它们的基本信息并给我推荐几个处理方案' : 'I uploaded these files, please analyze them and recommend processing plans.'
+                            title: locale === 'zh' ? '推荐处理方案' : 'Suggest plans',
+                            desc: locale === 'zh' ? '检查文件并推荐最佳处理方案' : 'Check files and suggest actions',
+                            cmd: locale === 'zh' ? '我上传了这些文件，请分析它们的基本信息并给我推荐几个处理方案' : 'I uploaded these files, please analyze them and recommend processing plans.',
+                            icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                           },
                           {
-                            title: locale === 'zh' ? '📖 汇总文档核心摘要' : '📖 Document summary',
-                            desc: locale === 'zh' ? '阅读加载的文件，提取出最核心的关键内容 and 决策要点' : 'Read loaded files and generate executive summary',
-                            cmd: locale === 'zh' ? '请阅读我加载的文件，并为我写一份简洁的核心内容摘要' : 'Please read the loaded files and write a concise executive summary.'
+                            title: locale === 'zh' ? '核心摘要' : 'Summary',
+                            desc: locale === 'zh' ? '阅读文件并提取核心要点' : 'Read files and extract key points',
+                            cmd: locale === 'zh' ? '请阅读我加载的文件，并为我写一份简洁的核心内容摘要' : 'Please read the loaded files and write a concise executive summary.',
+                            icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                           },
                           {
-                            title: locale === 'zh' ? '📋 将表格转换格式' : '📋 Convert spreadsheet',
-                            desc: locale === 'zh' ? '将 CSV 或 Excel 数据转换为 Markdown 表格，并做汇总' : 'Convert CSV or Excel data to markdown table',
-                            cmd: locale === 'zh' ? '请把数据表格转换为 Markdown 格式展示' : 'Please convert the loaded spreadsheet into Markdown format.'
+                            title: locale === 'zh' ? '表格转换' : 'Convert data',
+                            desc: locale === 'zh' ? '将数据转换为 Markdown 表格' : 'Convert data to markdown table',
+                            cmd: locale === 'zh' ? '请把数据表格转换为 Markdown 格式展示' : 'Please convert the loaded spreadsheet into Markdown format.',
+                            icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                           },
                           {
-                            title: locale === 'zh' ? '🔗 合并 PDF 文档' : '🔗 Merge PDFs',
-                            desc: locale === 'zh' ? '如果左侧包含多份 PDF，一键合并它们并附带页码' : 'Merge multiple PDF files into one output',
-                            cmd: locale === 'zh' ? '帮我把工作区里的 PDF 文件合并成一份，并确保格式完好' : 'Help me merge the PDF files in the workspace into one.'
+                            title: locale === 'zh' ? '合并 PDF' : 'Merge PDFs',
+                            desc: locale === 'zh' ? '一键合并多份 PDF 文档' : 'Merge multiple PDFs into one',
+                            cmd: locale === 'zh' ? '帮我把工作区里的 PDF 文件合并成一份，并确保格式完好' : 'Help me merge the PDF files in the workspace into one.',
+                            icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                           }
                         ].map((item, idx) => (
                           <button
                             key={idx}
                             onClick={() => sendMessage(item.cmd)}
                             disabled={isProcessing}
-                            className="p-4 text-left rounded-2xl border border-[var(--border-color)] nm-flat hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-colors group flex flex-col justify-between text-sm"
+                            className="p-3.5 text-left rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent-subtle)] transition-all group flex items-start gap-3 disabled:opacity-50"
                           >
-                            <p className="text-xs font-bold text-gray-800 dark:text-gray-250 dark:text-gray-100 group-hover:text-blue-500 transition-colors">
-                              {item.title}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-300 mt-1 leading-snug">
-                              {item.desc}
-                            </p>
+                            <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent-subtle)] text-[var(--accent)] flex-shrink-0 group-hover:bg-[var(--accent)] group-hover:text-white transition-all">
+                              {item.icon}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">{item.title}</p>
+                              <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5 leading-snug">{item.desc}</p>
+                            </div>
                           </button>
                         ))}
                       </div>
@@ -864,74 +866,57 @@ export default function Home() {
                   </div>
                 ) : (
                   activities.map((entry) => {
-                    // ── Thinking group (collapsible) ──
+                    /* ── Thinking group ── */
                     if (entry.type === 'thinking_group') {
                       const steps: ThinkingStep[] = entry.meta?.steps || [];
                       if (steps.length === 0) return null;
                       return (
-                        <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
-                          <span className="text-xs font-mono mt-3 w-14 flex-shrink-0 text-gray-500 dark:text-gray-300">{timeStr(entry.timestamp)}</span>
+                        <div key={entry.id} className="flex items-start gap-2.5 min-w-0 w-full">
+                          <span className="text-[10px] font-mono mt-2.5 w-12 flex-shrink-0 text-[var(--text-tertiary)]">{timeStr(entry.timestamp)}</span>
                           <div className="flex-1 min-w-0">
-                            <ThinkingPanel
-                              steps={steps}
-                              collapsed={entry.meta?.collapsed ?? false}
-                              isLive={entry.meta?.isLive ?? false}
-                              onToggle={() => {
-                                setActivities((prev) => prev.map((a) =>
-                                  a.id === entry.id
-                                    ? { ...a, meta: { ...a.meta, collapsed: !a.meta?.collapsed } }
-                                    : a
-                                ));
-                              }}
-                              isDark={isDark}
-                              locale={locale}
-                            />
+                            <ThinkingPanel steps={steps} collapsed={entry.meta?.collapsed ?? false} isLive={entry.meta?.isLive ?? false}
+                              onToggle={() => { setActivities((prev) => prev.map((a) => a.id === entry.id ? { ...a, meta: { ...a.meta, collapsed: !a.meta?.collapsed } } : a)); }}
+                              isDark={isDark} locale={locale} />
                           </div>
                         </div>
                       );
                     }
 
-                    // ── Retry card ──
+                    /* ── Retry card ── */
                     if (entry.type === 'retry_card') {
                       return (
-                        <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
-                          <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-300">{timeStr(entry.timestamp)}</span>
-                          <div className="flex-1 rounded-2xl border p-4 bg-red-50 dark:bg-red-950/15 border-red-200 dark:border-red-800/30">
-                            <p className="text-xs mb-3 text-red-600 dark:text-red-300">
-                              ⚠️ {entry.content}
-                            </p>
-                            <button
-                              onClick={() => sendMessage(entry.meta?.message)}
-                              disabled={isProcessing}
-                              className="px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all nm-button text-red-500 border border-red-200 shadow-sm"
-                            >
-                              🔄 {locale === 'zh' ? '重新操作' : 'Retry'}
+                        <div key={entry.id} className="flex items-start gap-2.5 min-w-0 w-full">
+                          <span className="text-[10px] font-mono mt-1 w-12 flex-shrink-0 text-[var(--text-tertiary)]">{timeStr(entry.timestamp)}</span>
+                          <div className="flex-1 rounded-xl border p-3.5 bg-red-50 dark:bg-red-950/10 border-red-200 dark:border-red-800/20">
+                            <p className="text-xs mb-2.5 text-red-600 dark:text-red-300">⚠️ {entry.content}</p>
+                            <button onClick={() => sendMessage(entry.meta?.message)} disabled={isProcessing}
+                              className="px-3 py-1.5 text-xs font-semibold rounded-lg nm-button text-red-500">
+                              {locale === 'zh' ? '重新操作' : 'Retry'}
                             </button>
                           </div>
                         </div>
                       );
                     }
 
-                    // ── Standard entries ──
+                    /* ── Standard entries ── */
                     return (
-                      <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
-                        <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-300">{timeStr(entry.timestamp)}</span>
+                      <div key={entry.id} className="flex items-start gap-2.5 min-w-0 w-full">
+                        <span className="text-[10px] font-mono mt-1 w-12 flex-shrink-0 text-[var(--text-tertiary)]">{timeStr(entry.timestamp)}</span>
 
                         {entry.type === 'user' && (
                           <>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400">YOU</span>
-                            <p className="text-[15px] leading-relaxed text-blue-900 dark:text-blue-100">{entry.content}</p>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-[var(--accent-subtle)] text-[var(--accent)]">YOU</span>
+                            <p className="text-[14px] leading-relaxed text-[var(--text-primary)]">{entry.content}</p>
                           </>
                         )}
 
                         {entry.type === 'system' && (
-                          <p className="text-sm italic text-gray-600 dark:text-gray-400">{entry.content}</p>
+                          <p className="text-sm italic text-[var(--text-secondary)]">{entry.content}</p>
                         )}
 
-                        {/* tool_call kept for legacy/fallback rendering */}
                         {entry.type === 'tool_call' && (
                           <>
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-lg flex-shrink-0 ${isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
                               {locale === 'zh' ? '操作' : 'ACT'}
                             </span>
                             <span className="text-xs text-amber-700 dark:text-amber-200/80">{entry.content}</span>
@@ -940,19 +925,15 @@ export default function Home() {
 
                         {entry.type === 'suggestions' && entry.meta?.actions && (
                           <div className="flex-1 min-w-0">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-1">
                               {(entry.meta.actions as Array<{ id: string; emoji: string; title: string; description: string }>).map((action) => (
-                                <button
-                                  key={action.id}
-                                  onClick={() => sendMessage(action.title)}
-                                  disabled={isProcessing}
-                                  className="text-left px-4 py-3 rounded-2xl border border-[var(--border-color)] nm-flat hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-colors disabled:opacity-50"
-                                >
-                                  <div className="flex items-start gap-3">
+                                <button key={action.id} onClick={() => sendMessage(action.title)} disabled={isProcessing}
+                                  className="text-left px-3.5 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent-subtle)] transition-all disabled:opacity-50">
+                                  <div className="flex items-start gap-2.5">
                                     <span className="text-base flex-shrink-0 mt-0.5">{action.emoji}</span>
                                     <div className="min-w-0">
-                                      <p className={`text-xs font-bold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{action.title}</p>
-                                      <p className={`text-[10px] mt-0.5 leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>{action.description}</p>
+                                      <p className="text-[12px] font-bold text-[var(--text-primary)]">{action.title}</p>
+                                      <p className="text-[10px] mt-0.5 leading-relaxed text-[var(--text-tertiary)]">{action.description}</p>
                                     </div>
                                   </div>
                                 </button>
@@ -963,7 +944,7 @@ export default function Home() {
 
                         {entry.type === 'text' && (
                           <>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0 bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300">AI</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-gradient-to-r from-[var(--accent-subtle)] to-transparent text-[var(--accent)]">AI</span>
                             <div className="flex-1 min-w-0 overflow-x-auto">
                               <StreamingText content={entry.content} isStreaming={isProcessing && entry.id === activities[activities.length - 1]?.id} />
                             </div>
@@ -972,17 +953,17 @@ export default function Home() {
 
                         {entry.type === 'file_download' && (
                           <>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0 ${isDark ? 'bg-emerald-900/20 text-emerald-400 dark:text-emerald-300' : 'bg-emerald-50 text-emerald-700'}`}>FILE</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${isDark ? 'bg-emerald-900/20 text-emerald-400' : 'bg-emerald-50 text-emerald-700'}`}>FILE</span>
                             <span className={`text-sm font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                              {locale === 'zh' ? '生成文件可用 ↓' : 'File ready ↓'}
+                              {locale === 'zh' ? '文件可下载' : 'File ready'} ↓
                             </span>
                           </>
                         )}
 
                         {entry.type === 'error' && (
                           <>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300">ERR</span>
-                            <pre className={`text-xs overflow-x-auto max-h-20 overflow-y-auto flex-1 p-2 rounded-xl border border-[var(--border-color)] ${isDark ? 'text-red-300 bg-red-950/10' : 'text-red-600 dark:text-red-400 bg-red-50'}`}>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300">ERR</span>
+                            <pre className={`text-xs overflow-x-auto max-h-20 overflow-y-auto flex-1 p-2.5 rounded-lg border border-[var(--border-subtle)] ${isDark ? 'text-red-300 bg-red-950/10' : 'text-red-600 bg-red-50'}`}>
                               {entry.content.slice(0, 500)}
                             </pre>
                           </>
@@ -993,31 +974,31 @@ export default function Home() {
                 )}
 
                 {isProcessing && (
-                  <div className={`flex items-center gap-2 text-xs py-1 pl-16 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    {locale === 'zh' ? '助理正在执行中...' : 'Processing...'}
+                  <div className="flex items-center gap-2 text-xs py-1 pl-14 text-[var(--accent)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+                    {locale === 'zh' ? '处理中...' : 'Processing...'}
                   </div>
                 )}
 
-                {/* File downloads history list */}
+                {/* Downloads list */}
                 {!isProcessing && activities.filter((a) => a.type === 'file_download').length > 0 && (
-                  <div className="mt-6 p-4 rounded-2xl border border-[var(--border-color)] nm-pressed w-full">
-                    <p className="text-sm font-bold mb-3 text-emerald-600 dark:text-emerald-400">
-                      📥 {locale === 'zh' ? '已生成的可下载文件' : 'Generated Downloads'}
+                  <div className="mt-4 p-4 rounded-xl bg-[var(--bg-inset)] border border-[var(--border-subtle)] w-full">
+                    <p className="text-xs font-bold mb-2.5 text-emerald-600 dark:text-emerald-400">
+                      {locale === 'zh' ? '已生成文件' : 'Generated Files'}
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {activities.filter((a) => a.type === 'file_download').map((entry) => (
                         <a key={entry.id}
                           href={`data:application/octet-stream;base64,${entry.meta?.base64 || ''}`}
                           download={entry.content}
-                          className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-[var(--border-color)] nm-flat hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-colors">
+                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-colors">
                           <svg className="w-4 h-4 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
                           <div className="min-w-0">
-                            <span className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate block">{entry.content}</span>
+                            <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate block">{entry.content}</span>
                             {entry.meta?.description && (
-                              <span className="text-xs text-gray-500 dark:text-gray-300 block truncate mt-0.5">{entry.meta.description}</span>
+                              <span className="text-[11px] text-[var(--text-tertiary)] block truncate mt-0.5">{entry.meta.description}</span>
                             )}
                           </div>
                         </a>
@@ -1031,73 +1012,53 @@ export default function Home() {
             </div>
 
             {/* Bottom Input Area */}
-            <div className="pt-3 border-t border-[var(--border-color)] flex-shrink-0">
-              
-              {/* Dynamic queued files mini chips above text input */}
+            <div className="px-5 pb-4 pt-2 border-t border-[var(--border-subtle)] flex-shrink-0">
+
+              {/* Queued file chips */}
               {queuedFiles.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3 px-1">
+                <div className="flex flex-wrap gap-1.5 mb-2.5 px-0.5">
                   {queuedFiles.map((f) => (
-                    <span
-                      key={f.id}
-                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-semibold border border-blue-200 dark:border-blue-900 bg-blue-500/5 text-blue-600 dark:text-blue-400 dark:text-blue-400"
-                    >
+                    <span key={f.id}
+                      className="inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--accent-subtle)] text-[var(--accent)]">
                       <span>{getFileIcon(f.type)}</span>
-                      <span className="max-w-[130px] truncate">{f.name}</span>
-                      <button
-                        onClick={() => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
-                        className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-blue-500/20 text-blue-400 hover:text-blue-600"
-                      >
-                        ×
-                      </button>
+                      <span className="max-w-[120px] truncate">{f.name}</span>
+                      <button onClick={() => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
+                        className="w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-[var(--accent)]/20 transition-colors">×</button>
                     </span>
                   ))}
                   {queuedFiles.length > 1 && (
-                    <button
-                      onClick={() => setFiles((prev) => prev.filter((f) => sentFileIds.current.has(f.id)))}
-                      className="text-[11px] text-gray-400 dark:text-gray-500 hover:text-red-500 hover:underline px-2 py-1 transition-colors"
-                    >
-                      {locale === 'zh' ? '清空待发' : 'Clear Queue'}
+                    <button onClick={() => setFiles((prev) => prev.filter((f) => sentFileIds.current.has(f.id)))}
+                      className="text-[10px] text-[var(--text-tertiary)] hover:text-red-500 hover:underline px-1.5 py-0.5 transition-colors">
+                      {locale === 'zh' ? '清空' : 'Clear all'}
                     </button>
                   )}
                 </div>
               )}
 
               {/* Input bar */}
-              <div className="flex items-end gap-2 rounded-2xl p-2 nm-pressed border border-[var(--border-color)]">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isProcessing}
-                  title={locale === 'zh' ? '选择上传文件' : 'Attach files'}
-                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all nm-button border border-[var(--border-color)] text-gray-400 hover:text-blue-500"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              <div className="flex items-end gap-2 rounded-xl p-1.5 nm-pressed glow-accent border border-[var(--border-subtle)]">
+                <button onClick={() => fileInputRef.current?.click()} disabled={isProcessing}
+                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-tertiary)] hover:text-[var(--accent)]">
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                   </svg>
                 </button>
 
-                <input
-                  type="text"
-                  value={userInput}
+                <input type="text" value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onCompositionStart={() => { isComposingRef.current = true; }}
                   onCompositionEnd={() => { isComposingRef.current = false; }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && !isComposingRef.current) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder={locale === 'zh' ? '输入指令，如：提取表格数据 / 合并 PDF / 写摘要' : 'Enter command...'}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !isComposingRef.current) { e.preventDefault(); sendMessage(); } }}
+                  placeholder={locale === 'zh' ? '输入指令...' : 'Type a command...'}
                   disabled={isProcessing}
-                  className="flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-50 py-2 px-2 text-[var(--foreground)] placeholder-gray-400"
-                />
+                  className="flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-50 py-2 px-1.5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)]" />
 
-                <button
-                  onClick={() => sendMessage()}
+                <button onClick={() => sendMessage()}
                   disabled={(!userInput.trim() && queuedFiles.length === 0) || isProcessing}
-                  className="flex-shrink-0 px-5 py-2 text-sm font-bold rounded-xl transition-all nm-button-primary disabled:opacity-40 disabled:pointer-events-none"
-                >
-                  {isProcessing ? '...' : locale === 'zh' ? '发送' : 'Send'}
+                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg nm-button-primary disabled:opacity-40 disabled:pointer-events-none">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
             </div>
