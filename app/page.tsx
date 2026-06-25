@@ -3,6 +3,16 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { marked } from 'marked';
 import { useI18n } from '@/lib/i18n';
+import {
+  MAX_FILES_PER_REQUEST,
+  MAX_IMAGE_DIMENSION,
+  MAX_IMAGE_PIXELS,
+  MAX_SINGLE_FILE_BYTES,
+  MAX_TOTAL_UPLOAD_BYTES,
+  getUploadFileKind,
+  humanFileSize,
+  isSupportedUploadFileName,
+} from '@/lib/file-policy';
 
 // Configure marked for GFM tables
 marked.setOptions({ gfm: true, breaks: true });
@@ -13,7 +23,11 @@ export interface FileItem {
   id: string;
   name: string;
   type: 'pdf' | 'image' | 'word' | 'excel' | 'csv' | 'text';
+  byteSize: number;
   size: string;
+  mimeType?: string;
+  width?: number;
+  height?: number;
   status: 'queued' | 'processing' | 'done' | 'error';
   base64?: string;
 }
@@ -138,16 +152,6 @@ function ThinkingPanel({
 
 // ============ Helpers ============
 
-function getFileType(name: string): FileItem['type'] {
-  const ext = name.split('.').pop()?.toLowerCase() || '';
-  if (['pdf'].includes(ext)) return 'pdf';
-  if (['doc', 'docx'].includes(ext)) return 'word';
-  if (['xls', 'xlsx'].includes(ext)) return 'excel';
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) return 'image';
-  if (['csv'].includes(ext)) return 'csv';
-  return 'text';
-}
-
 function getFileIcon(type: FileItem['type']): string {
   switch (type) {
     case 'pdf': return '📄';
@@ -165,6 +169,29 @@ function readFileAsBase64(file: File): Promise<string> {
     reader.onload = () => resolve((reader.result as string).split(',')[1] || '');
     reader.onerror = reject;
     reader.readAsDataURL(file);
+  });
+}
+
+async function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  if (typeof createImageBitmap === 'function') {
+    const bitmap = await createImageBitmap(file);
+    const size = { width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return size;
+  }
+
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Unable to read image dimensions'));
+    };
+    img.src = url;
   });
 }
 
@@ -215,28 +242,16 @@ function toolToAgentAction(tool: string, input: any, locale: string): string {
 
 // ============ Sample Files ============
 
-const SAMPLE_FILES: Omit<FileItem, 'base64'>[] = [
-  { id: 's1', name: 'quarterly-report.txt', type: 'text', size: '2.1 KB', status: 'queued' },
-  { id: 's2', name: 'project-plan.md', type: 'text', size: '1.5 KB', status: 'queued' },
-  { id: 's3', name: 'sales-data.csv', type: 'csv', size: '380 B', status: 'queued' },
-  { id: 's4', name: 'team-contacts.csv', type: 'csv', size: '260 B', status: 'queued' },
-];
+function estimateImageSize(file: File, dimensions?: { width: number; height: number }): number {
+  if (!dimensions) return file.size;
+  const pixels = dimensions.width * dimensions.height;
+  if (!pixels) return file.size;
+  const inferredBytes = Math.max(file.size, Math.round(pixels * 0.35));
+  return inferredBytes;
+}
 
-function generateSampleContent(name: string): string {
-  const ext = name.split('.').pop()?.toLowerCase() || '';
-  let text = '';
-  if (ext === 'txt') {
-    text = 'Quarterly Financial Report 2024 Q4\n====================================\n\nRevenue: $2.4B (+15% YoY)\nNet Profit: $340M (+22% YoY)\nOperating Margin: 28%\n\nKey Highlights:\n- Expanded into 3 new markets\n- Customer base grew 22%\n- Reduced operational costs by 18%\n- Launched AI-powered product suite\n\nRevenue Breakdown:\n- Enterprise: $1.2B (50%)\n- SMB: $720M (30%)\n- Consumer: $480M (20%)';
-  } else if (ext === 'md') {
-    text = '# Project Plan: AI Integration 2025\n\n## Phase 1: Research (Jan-Mar)\n- Evaluate LLM providers\n- Build POC\n\n## Phase 2: Development (Apr-Jun)\n- API architecture\n- RAG pipeline\n- Testing framework\n\n## Phase 3: Launch (Jul-Sep)\n- Beta testing\n- Customer pilot\n- Production deployment\n\n## Team\n| Role | Name | Allocation |\n|------|------|---|\n| Tech Lead | Alice | 100% |\n| Backend | Bob | 100% |\n| ML | Eric | 100% |\n| PM | Fiona | 50% |';
-  } else if (ext === 'csv' && name.includes('sales')) {
-    text = 'Product,Q1_Revenue,Q2_Revenue,Q3_Revenue,Q4_Revenue,Unit_Price,Units_Sold\nWidget Pro,45000,52000,61000,72000,299,241\nWidget Lite,28000,31000,35000,42000,149,282\nWidget Enterprise,120000,135000,155000,180000,999,180\nCloud Suite,85000,95000,110000,128000,599,214\nData Toolkit,32000,38000,44000,51000,199,256\nAI Assistant,15000,42000,68000,95000,399,238\nMobile App,22000,25000,29000,34000,99,343\nAPI Gateway,55000,62000,71000,82000,499,164';
-  } else if (ext === 'csv') {
-    text = 'Name,Email,Department,Role,Location,Start_Date\nAlice Chen,alice@company.com,Engineering,Tech Lead,Beijing,2020-03-15\nBob Wang,bob@company.com,Engineering,Senior Engineer,Shanghai,2021-06-01\nCharlie Liu,charlie@company.com,Engineering,Engineer,Shenzhen,2022-01-10\nDiana Zhang,diana@company.com,Product,Product Manager,Beijing,2021-09-20\nEric Li,eric@company.com,Engineering,ML Engineer,Hangzhou,2023-02-28\nFiona Wu,fiona@company.com,Product,Senior PM,Beijing,2019-11-05\nGrace Huang,grace@company.com,Design,UI Designer,Shanghai,2022-07-15';
-  } else {
-    text = `Sample content for ${name}`;
-  }
-  return btoa(unescape(encodeURIComponent(text)));
+function getUploadAcceptString(): string {
+  return '.pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.gif,.webp,.bmp,.tif,.tiff,.txt,.md,.json,.xml,.html,.log,.yml,.yaml';
 }
 
 // ============ Main Component ============
@@ -247,7 +262,7 @@ export default function Home() {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [userInput, setUserInput] = useState('');
-  const [conversationId] = useState(() => crypto.randomUUID());
+  const [conversationId, setConversationId] = useState(() => crypto.randomUUID());
   const [tokenUsage, setTokenUsage] = useState({ input: 0, output: 0 });
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -258,6 +273,7 @@ export default function Home() {
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const isComposingRef = useRef(false);
   const pendingAutoAnalyze = useRef(false);
+  const activeRequestAbortRef = useRef<AbortController | null>(null);
   // Track which files have already been sent to avoid re-uploading
   const sentFileIds = useRef<Set<string>>(new Set());
 
@@ -283,22 +299,123 @@ export default function Home() {
     setActivities((prev) => [...prev, { id, timestamp: Date.now(), type, content, meta }]);
   }, []);
 
+  const resetToHome = useCallback(() => {
+    activeRequestAbortRef.current?.abort();
+    activeRequestAbortRef.current = null;
+    setFiles([]);
+    setActivities([]);
+    setUserInput('');
+    setIsProcessing(false);
+    setWorkspaceOpen(false);
+    setTokenUsage({ input: 0, output: 0 });
+    pendingAutoAnalyze.current = false;
+    sentFileIds.current.clear();
+    setConversationId(crypto.randomUUID());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // File handling
   const processFiles = useCallback(async (selectedFiles: File[]) => {
-    const items: FileItem[] = await Promise.all(
-      selectedFiles.map(async (f) => ({
+    const queuedBytes = files
+      .filter((f) => !sentFileIds.current.has(f.id))
+      .reduce((sum, f) => sum + f.byteSize, 0);
+    const queuedCount = files.filter((f) => !sentFileIds.current.has(f.id)).length;
+
+    const accepted: FileItem[] = [];
+    const rejected: string[] = [];
+    let runningBytes = queuedBytes;
+    const remainingSlots = Math.max(0, MAX_FILES_PER_REQUEST - queuedCount);
+
+    for (const f of selectedFiles) {
+      if (accepted.length >= remainingSlots) {
+        rejected.push(
+          locale === 'zh'
+            ? `本次最多还能再加入 ${remainingSlots} 个文件。`
+            : `You can only add ${remainingSlots} more file(s) right now.`
+        );
+        break;
+      }
+      const kind = getUploadFileKind(f.name);
+      if (!isSupportedUploadFileName(f.name)) {
+        rejected.push(
+          locale === 'zh'
+            ? `${f.name} 不在支持范围内。`
+            : `${f.name} is not a supported file type.`
+        );
+        continue;
+      }
+      if (f.size > MAX_SINGLE_FILE_BYTES) {
+        rejected.push(
+          locale === 'zh'
+            ? `${f.name} 超过单文件上限 ${humanFileSize(MAX_SINGLE_FILE_BYTES)}。`
+            : `${f.name} exceeds the ${humanFileSize(MAX_SINGLE_FILE_BYTES)} per-file limit.`
+        );
+        continue;
+      }
+      if (runningBytes + f.size > MAX_TOTAL_UPLOAD_BYTES) {
+        rejected.push(
+          locale === 'zh'
+            ? `本次上传总大小不能超过 ${humanFileSize(MAX_TOTAL_UPLOAD_BYTES)}。`
+            : `This batch exceeds the ${humanFileSize(MAX_TOTAL_UPLOAD_BYTES)} total upload limit.`
+        );
+        continue;
+      }
+
+      let width: number | undefined;
+      let height: number | undefined;
+      if (kind === 'image') {
+        try {
+          const dims = await getImageDimensions(f);
+          width = dims.width;
+          height = dims.height;
+          if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION || (width * height) > MAX_IMAGE_PIXELS) {
+            rejected.push(
+              locale === 'zh'
+                ? `${f.name} 分辨率过大，建议不超过 ${MAX_IMAGE_DIMENSION}px 且总像素不超过 ${(MAX_IMAGE_PIXELS / 1_000_000).toFixed(0)}MP。`
+                : `${f.name} is too large. Please keep each side under ${MAX_IMAGE_DIMENSION}px and total pixels under ${(MAX_IMAGE_PIXELS / 1_000_000).toFixed(0)}MP.`
+            );
+            continue;
+          }
+        } catch {
+          rejected.push(
+            locale === 'zh'
+              ? `${f.name} 不是可读取的图片文件。`
+              : `${f.name} could not be read as an image.`
+          );
+          continue;
+        }
+      }
+
+      const base64 = await readFileAsBase64(f);
+      accepted.push({
         id: crypto.randomUUID(),
         name: f.name,
-        type: getFileType(f.name),
-        size: f.size > 1024 * 1024 ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : `${(f.size / 1024).toFixed(0)} KB`,
-        status: 'queued' as const,
-        base64: await readFileAsBase64(f),
-      }))
-    );
-    setFiles((prev) => [...prev, ...items]);
+        type: kind,
+        byteSize: f.size,
+        size: humanFileSize(f.size),
+        mimeType: f.type || undefined,
+        width,
+        height,
+        status: 'queued',
+        base64,
+      });
+      runningBytes += f.size;
+    }
+
+    if (accepted.length > 0) {
+      setFiles((prev) => [...prev, ...accepted]);
+      pendingAutoAnalyze.current = true;
+    }
+
+    if (rejected.length > 0) {
+      addActivity(
+        'error',
+        rejected.slice(0, 3).join(' ')
+      );
+    }
+
     if (fileInputRef.current) fileInputRef.current.value = '';
-    pendingAutoAnalyze.current = true;
-  }, []);
+  }, [addActivity, files, locale]);
 
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -329,14 +446,6 @@ export default function Home() {
     if (droppedFiles.length > 0) await processFiles(droppedFiles);
   }, [processFiles]);
 
-  const loadSamples = useCallback(() => {
-    const items: FileItem[] = SAMPLE_FILES.map((f) => ({
-      ...f, id: crypto.randomUUID(), base64: generateSampleContent(f.name),
-    }));
-    setFiles(items);
-    pendingAutoAnalyze.current = true;
-  }, []);
-
   // Send message
   const sendMessage = useCallback(async (customMsg?: string, silent?: boolean) => {
     const text = customMsg || userInput.trim();
@@ -347,13 +456,31 @@ export default function Home() {
     // Only upload files that haven't been sent before
     const newFiles = files.filter((f) => f.status === 'queued' && !sentFileIds.current.has(f.id));
     let fullMessage = text;
-    const filesToUpload: Array<{ name: string; base64: string }> = [];
+    const filesToUpload: Array<{
+      name: string;
+      base64: string;
+      byteSize: number;
+      mimeType?: string;
+      kind: FileItem['type'];
+      width?: number;
+      height?: number;
+    }> = [];
 
     if (newFiles.length > 0) {
       const desc = newFiles.map((f) => `- ${f.name} (${f.type}, ${f.size})`).join('\n');
       fullMessage = `${text}\n\n上传的文件：\n${desc}`;
       for (const f of newFiles) {
-        if (f.base64) filesToUpload.push({ name: f.name, base64: f.base64 });
+        if (f.base64) {
+          filesToUpload.push({
+            name: f.name,
+            base64: f.base64,
+            byteSize: f.byteSize,
+            mimeType: f.mimeType,
+            kind: f.type,
+            width: f.width,
+            height: f.height,
+          });
+        }
         sentFileIds.current.add(f.id);
       }
       // Mark files as done
@@ -407,12 +534,15 @@ export default function Home() {
     };
 
     try {
+      const requestAbortController = new AbortController();
+      activeRequestAbortRef.current = requestAbortController;
       const resp = await fetch('/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'makers-conversation-id': conversationId,
         },
+        signal: requestAbortController.signal,
         body: JSON.stringify({ message: fullMessage, files: filesToUpload.length > 0 ? filesToUpload : undefined }),
       });
 
@@ -522,9 +652,13 @@ export default function Home() {
         addActivity('system', t.taskComplete);
       }
     } catch (err) {
+      if ((err as Error)?.name === 'AbortError') {
+        return;
+      }
       closeThinkingGroup();
       addActivity('error', `${(err as Error).message}`);
     } finally {
+      activeRequestAbortRef.current = null;
       setIsProcessing(false);
     }
   }, [userInput, files, isProcessing, conversationId, addActivity, locale]);
@@ -548,6 +682,10 @@ export default function Home() {
 
   // Queued (unsent) files — shown as chips in the input area
   const queuedFiles = files.filter((f) => !sentFileIds.current.has(f.id));
+  const queuedBytes = queuedFiles.reduce((sum, f) => sum + f.byteSize, 0);
+  const uploadRulesText = locale === 'zh'
+    ? `建议：单文件不超过 ${humanFileSize(MAX_SINGLE_FILE_BYTES)}，单次总计不超过 ${humanFileSize(MAX_TOTAL_UPLOAD_BYTES)}，图片边长不超过 ${MAX_IMAGE_DIMENSION}px。`
+    : `Recommended: keep each file under ${humanFileSize(MAX_SINGLE_FILE_BYTES)}, total uploads under ${humanFileSize(MAX_TOTAL_UPLOAD_BYTES)}, and images within ${MAX_IMAGE_DIMENSION}px per side.`;
 
   return (
     <div
@@ -571,7 +709,13 @@ export default function Home() {
 
       {/* Header */}
       <header className="flex-shrink-0 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] px-4 sm:px-6 py-2.5 flex items-center justify-between z-10">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={resetToHome}
+          aria-label={locale === 'zh' ? '回到初始页并开始新会话' : 'Return home and start a new session'}
+          title={locale === 'zh' ? '回到初始页' : 'Return home'}
+          className="flex items-center gap-3 rounded-xl -ml-1 px-1 py-1 text-left transition-colors hover:bg-[var(--bg-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+        >
           <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#E50914] to-[#9C070F] flex-shrink-0 shadow-[0_2px_8px_rgba(229,9,20,0.3)]">
             <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -605,7 +749,7 @@ export default function Home() {
               <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'}`} />
             </div>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-1.5 sm:gap-2">
           {tokenUsage.input > 0 && (
             <span className="hidden sm:inline-block text-[11px] px-2.5 py-1 rounded-full font-mono bg-[var(--bg-inset)] border border-[var(--border-subtle)] text-[var(--text-tertiary)]">
@@ -682,8 +826,8 @@ export default function Home() {
                   <span className="text-sm font-semibold text-[var(--text-primary)] block group-hover:text-[var(--accent)] transition-colors">
                     {locale === 'zh' ? '上传文件' : 'Upload Files'}
                   </span>
-                  <span className="text-[11px] text-[var(--text-tertiary)] block mt-0.5">
-                    {locale === 'zh' ? '拖拽或点击 · PDF/Word/Excel/图片/音视频' : 'Drag & drop · PDF, Word, Excel, Images, Media'}
+                  <span className="text-[12px] text-[var(--text-tertiary)] block mt-0.5 leading-snug">
+                    {locale === 'zh' ? '拖拽或点击上传 · PDF、Word、Excel、CSV、图片、文本' : 'Drag or click to upload · PDF, Word, Excel, CSV, images, text'}
                   </span>
                 </div>
               </div>
@@ -694,16 +838,14 @@ export default function Home() {
               {files.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-8">
                   <span className="text-3xl mb-3 opacity-30">📂</span>
-                  <p className="text-sm text-[var(--text-tertiary)]">
-                    {locale === 'zh' ? '暂无文件' : 'No files yet'}
+                  <p className="text-base font-medium text-[var(--text-primary)]">
+                    {locale === 'zh' ? '还没有文件' : 'No files yet'}
                   </p>
-                  <button
-                    onClick={loadSamples}
-                    disabled={isProcessing}
-                    className="mt-4 px-4 py-2 text-xs font-semibold rounded-lg nm-button text-[var(--accent)] disabled:opacity-50"
-                  >
-                    {locale === 'zh' ? '加载示例' : 'Load Samples'}
-                  </button>
+                  <p className="mt-1 text-[12px] leading-relaxed text-[var(--text-tertiary)] max-w-[220px]">
+                    {locale === 'zh'
+                      ? '先上传文件，或直接在右侧输入你想做的事情。'
+                      : 'Upload a file first, or type what you want to do on the right.'}
+                  </p>
                 </div>
               ) : (
                 files.map((file) => {
@@ -763,15 +905,6 @@ export default function Home() {
                 >
                   {locale === 'zh' ? '开始分析' : 'Analyze Files'}
                 </button>
-                {files.every(f => sentFileIds.current.has(f.id)) && (
-                  <button
-                    onClick={loadSamples}
-                    disabled={isProcessing}
-                    className="w-full py-2 text-xs font-semibold rounded-lg nm-button text-[var(--text-secondary)] disabled:opacity-50"
-                  >
-                    {locale === 'zh' ? '+ 导入示例文件' : '+ Load Samples'}
-                  </button>
-                )}
               </div>
             )}
 
@@ -803,42 +936,45 @@ export default function Home() {
                     </div>
 
                     <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-                      {locale === 'zh' ? 'DocFlix 智能文档助理' : 'DocFlix Doc Assistant'}
-                    </h2>
-                    <p className="text-sm text-[var(--text-secondary)] mb-8 leading-relaxed max-w-md">
+                    {locale === 'zh' ? '上传文件，开始处理' : 'Upload files to get started'}
+                  </h2>
+                    <p className="text-base text-[var(--text-secondary)] mb-5 leading-relaxed max-w-lg">
                       {locale === 'zh'
-                        ? '上传文档、表格或图片，输入指令即可让 AI 帮你分析、转换、合并。'
-                        : 'Upload docs, spreadsheets or images, then tell the AI what to do.'}
+                        ? '支持 PDF、Word、Excel、CSV、图片和文本。上传后可以直接让 AI 做摘要、转换、合并或整理。'
+                        : 'Supports PDF, Word, Excel, CSV, images, and text. Upload a file and ask for summaries, conversions, merges, or cleanup.'}
+                    </p>
+                    <p className="text-xs text-[var(--text-tertiary)] mb-7 leading-relaxed max-w-md">
+                      {uploadRulesText}
                     </p>
 
                     {/* Quick Command Cards */}
                     <div className="w-full space-y-3 text-left">
-                      <p className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest pl-1">
+                      <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest pl-1">
                         {locale === 'zh' ? '快速指令' : 'Quick Actions'}
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                         {[
                           {
-                            title: locale === 'zh' ? '推荐处理方案' : 'Suggest plans',
-                            desc: locale === 'zh' ? '检查文件并推荐最佳处理方案' : 'Check files and suggest actions',
+                            title: locale === 'zh' ? '分析并推荐' : 'Analyze & recommend',
+                            desc: locale === 'zh' ? '先检查文件，再给出处理建议' : 'Inspect the files first, then suggest next steps',
                             cmd: locale === 'zh' ? '我上传了这些文件，请分析它们的基本信息并给我推荐几个处理方案' : 'I uploaded these files, please analyze them and recommend processing plans.',
                             icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                           },
                           {
-                            title: locale === 'zh' ? '核心摘要' : 'Summary',
-                            desc: locale === 'zh' ? '阅读文件并提取核心要点' : 'Read files and extract key points',
+                            title: locale === 'zh' ? '生成摘要' : 'Summarize',
+                            desc: locale === 'zh' ? '提炼内容重点' : 'Extract the main points',
                             cmd: locale === 'zh' ? '请阅读我加载的文件，并为我写一份简洁的核心内容摘要' : 'Please read the loaded files and write a concise executive summary.',
                             icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                           },
                           {
-                            title: locale === 'zh' ? '表格转换' : 'Convert data',
-                            desc: locale === 'zh' ? '将数据转换为 Markdown 表格' : 'Convert data to markdown table',
+                            title: locale === 'zh' ? '表格转 Markdown' : 'Table to Markdown',
+                            desc: locale === 'zh' ? '把表格整理成可读格式' : 'Turn spreadsheets into readable tables',
                             cmd: locale === 'zh' ? '请把数据表格转换为 Markdown 格式展示' : 'Please convert the loaded spreadsheet into Markdown format.',
                             icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                           },
                           {
                             title: locale === 'zh' ? '合并 PDF' : 'Merge PDFs',
-                            desc: locale === 'zh' ? '一键合并多份 PDF 文档' : 'Merge multiple PDFs into one',
+                            desc: locale === 'zh' ? '合并多份 PDF' : 'Merge multiple PDF files',
                             cmd: locale === 'zh' ? '帮我把工作区里的 PDF 文件合并成一份，并确保格式完好' : 'Help me merge the PDF files in the workspace into one.',
                             icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                           }
@@ -941,7 +1077,7 @@ export default function Home() {
 
                         {entry.type === 'text' && (
                           <>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-gradient-to-r from-[var(--accent-subtle)] to-transparent text-[var(--accent)]">AI</span>
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-gradient-to-r from-[var(--accent-subtle)] to-transparent text-[var(--accent)]">AI</span>
                             <div className="flex-1 min-w-0 overflow-x-auto">
                               <StreamingText content={entry.content} isStreaming={isProcessing && entry.id === activities[activities.length - 1]?.id} />
                             </div>
@@ -950,7 +1086,7 @@ export default function Home() {
 
                         {entry.type === 'file_download' && (
                           <>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${isDark ? 'bg-emerald-900/20 text-emerald-400' : 'bg-emerald-50 text-emerald-700'}`}>FILE</span>
+                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${isDark ? 'bg-emerald-900/20 text-emerald-400' : 'bg-emerald-50 text-emerald-700'}`}>FILE</span>
                             <span className={`text-sm font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
                               {locale === 'zh' ? '文件可下载' : 'File ready'} ↓
                             </span>
@@ -959,7 +1095,7 @@ export default function Home() {
 
                         {entry.type === 'error' && (
                           <>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300">ERR</span>
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300">ERR</span>
                             <pre className={`text-xs overflow-x-auto max-h-20 overflow-y-auto flex-1 p-2.5 rounded-lg border border-[var(--border-subtle)] ${isDark ? 'text-red-300 bg-red-950/10' : 'text-red-600 bg-red-50'}`}>
                               {entry.content.slice(0, 500)}
                             </pre>
@@ -971,9 +1107,9 @@ export default function Home() {
                 )}
 
                 {isProcessing && (
-                  <div className="flex items-center gap-2 text-xs py-1 pl-14 text-[var(--accent)]">
+                  <div className="flex items-center gap-2 text-sm py-1 pl-14 text-[var(--accent)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-                    {locale === 'zh' ? '处理中...' : 'Processing...'}
+                    {locale === 'zh' ? '正在处理文件...' : 'Processing files...'}
                   </div>
                 )}
 
@@ -993,9 +1129,9 @@ export default function Home() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
                           <div className="min-w-0">
-                            <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate block">{entry.content}</span>
+                            <span className="text-sm font-semibold text-[var(--text-primary)] truncate block">{entry.content}</span>
                             {entry.meta?.description && (
-                              <span className="text-[11px] text-[var(--text-tertiary)] block truncate mt-0.5">{entry.meta.description}</span>
+                              <span className="text-xs text-[var(--text-tertiary)] block truncate mt-0.5">{entry.meta.description}</span>
                             )}
                           </div>
                         </a>
@@ -1016,7 +1152,7 @@ export default function Home() {
                 <div className="flex flex-wrap gap-1.5 mb-2.5 px-0.5">
                   {queuedFiles.map((f) => (
                     <span key={f.id}
-                      className="inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--accent-subtle)] text-[var(--accent)]">
+                      className="inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-md text-[11px] font-semibold bg-[var(--accent-subtle)] text-[var(--accent)]">
                       <span>{getFileIcon(f.type)}</span>
                       <span className="max-w-[120px] truncate">{f.name}</span>
                       <button onClick={() => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
@@ -1025,12 +1161,22 @@ export default function Home() {
                   ))}
                   {queuedFiles.length > 1 && (
                     <button onClick={() => setFiles((prev) => prev.filter((f) => sentFileIds.current.has(f.id)))}
-                      className="text-[10px] text-[var(--text-tertiary)] hover:text-red-500 hover:underline px-1.5 py-0.5 transition-colors">
+                      className="text-[11px] text-[var(--text-tertiary)] hover:text-red-500 hover:underline px-1.5 py-0.5 transition-colors">
                       {locale === 'zh' ? '清空' : 'Clear all'}
                     </button>
                   )}
                 </div>
               )}
+              <p className="mb-2 text-xs text-[var(--text-tertiary)] px-0.5">
+                {uploadRulesText}
+                {queuedFiles.length > 0 && (
+                  <span className="ml-2">
+                    {locale === 'zh'
+                      ? `当前待处理 ${queuedFiles.length} 个文件，共 ${humanFileSize(queuedBytes)}。`
+                      : `${queuedFiles.length} queued file(s), ${humanFileSize(queuedBytes)} total.`}
+                  </span>
+                )}
+              </p>
 
               {/* Input bar */}
               <div className="flex items-end gap-2 rounded-xl p-1.5 nm-pressed glow-accent border border-[var(--border-subtle)]">
@@ -1048,7 +1194,7 @@ export default function Home() {
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !isComposingRef.current) { e.preventDefault(); sendMessage(); } }}
                   placeholder={locale === 'zh' ? '输入指令...' : 'Type a command...'}
                   disabled={isProcessing}
-                  className="flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-50 py-2 px-1.5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)]" />
+                  className="flex-1 bg-transparent text-[15px] focus:outline-none disabled:opacity-50 py-2 px-1.5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)]" />
 
                 <button onClick={() => sendMessage()}
                   disabled={(!userInput.trim() && queuedFiles.length === 0) || isProcessing}
@@ -1072,7 +1218,7 @@ export default function Home() {
         multiple
         className="hidden"
         onChange={handleFileSelect}
-        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.json,.xml,.html"
+        accept={getUploadAcceptString()}
       />
     </div>
   );

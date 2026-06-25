@@ -7,7 +7,7 @@ type Locale = 'zh' | 'en';
 export const translations = {
   zh: {
     title: '智能文档处理',
-    description: 'AI Agent 驱动的文档处理：PDF 合并、Word 转 PDF、Excel 转表格、图片分析、视频解析',
+    description: 'AI Agent 驱动的文档处理：PDF 合并、Word 转 PDF、Excel 转表格、图片分析',
     dropFiles: '拖放文件或点击上传',
     process: '处理',
     clear: '清除',
@@ -31,7 +31,7 @@ export const translations = {
     done: '完成',
     error: '错误',
     toolCalled: '工具调用',
-    supportedTypes: '支持 PDF、Word、Excel、图片、CSV、文本',
+    supportedTypes: '支持 PDF、Word、Excel、PNG/JPG/WebP/GIF/BMP/TIFF、CSV、文本',
     video: '视频',
     word: 'Word',
     excel: 'Excel',
@@ -46,7 +46,7 @@ export const translations = {
   },
   en: {
     title: 'Smart Document Processor',
-    description: 'AI Agent-powered: PDF merge, Word→PDF, Excel→Markdown, image analysis, video parsing',
+    description: 'AI Agent-powered: PDF merge, Word→PDF, Excel→Markdown, image analysis',
     dropFiles: 'Drop files or click to upload',
     process: 'Process',
     clear: 'Clear',
@@ -70,7 +70,7 @@ export const translations = {
     done: 'Done',
     error: 'Error',
     toolCalled: 'Tool Called',
-    supportedTypes: 'Supports PDF, Word, Excel, Images, CSV, Text',
+    supportedTypes: 'Supports PDF, Word, Excel, PNG/JPG/WebP/GIF/BMP/TIFF, CSV, Text',
     video: 'Video',
     word: 'Word',
     excel: 'Excel',

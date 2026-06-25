@@ -5,6 +5,7 @@
 
 import { createLogger } from "../_shared";
 import { SKILL_PDF_GENERATION } from "./_templates";
+import { getUploadFileKind, type UploadFileKind } from "../../lib/file-policy";
 
 const logger = createLogger("skills");
 
@@ -146,7 +147,7 @@ export const SKILL_TEXT = `## Loaded Skill: Text/Markdown/JSON Processing
 `;
 
 /** Build system prompt dynamically based on uploaded file types */
-export function buildSystemPrompt(files: Array<{name: string}>, sandboxWorking: boolean, locale: 'zh' | 'en' = 'en'): string {
+export function buildSystemPrompt(files: Array<{name: string; kind?: UploadFileKind}>, sandboxWorking: boolean, locale: 'zh' | 'en' = 'en'): string {
   const skills = new Set<string>();
 
   if (files.length === 0 && sandboxWorking) {
@@ -161,14 +162,8 @@ export function buildSystemPrompt(files: Array<{name: string}>, sandboxWorking: 
     skills.add('mixed');
   } else {
     for (const file of files) {
-      const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) skills.add('image');
-      else if (['csv'].includes(ext)) skills.add('csv');
-      else if (['pdf'].includes(ext)) skills.add('pdf');
-      else if (['doc', 'docx'].includes(ext)) skills.add('word');
-      else if (['xls', 'xlsx'].includes(ext)) skills.add('excel');
-      else if (['md', 'txt', 'json', 'xml', 'html', 'log', 'yml', 'yaml'].includes(ext)) skills.add('text');
-      else skills.add('text');
+      const kind = file.kind || getUploadFileKind(file.name);
+      skills.add(kind);
     }
   }
 

@@ -23,6 +23,18 @@ import {
   canInlineFallbackFile,
   buildDefaultActions,
 } from "./_tools";
+import {
+  estimateBase64Bytes,
+  getUploadFileKind,
+  humanFileSize,
+  isSupportedUploadFileName,
+  MAX_FILES_PER_REQUEST,
+  MAX_IMAGE_DIMENSION,
+  MAX_IMAGE_PIXELS,
+  MAX_SINGLE_FILE_BYTES,
+  MAX_TOTAL_UPLOAD_BYTES,
+  type UploadFileKind,
+} from "../../lib/file-policy";
 
 const logger = createLogger("chat");
 
@@ -150,17 +162,24 @@ class LRUMap<K, V> {
 }
 
 /** In-process file cache with LRU eviction: limits concurrent cached sessions to 20 to prevent memory exhaustion */
-const _sessionFileCache = new LRUMap<
-  string,
-  Array<{ name: string; base64: string }>
->(20);
+type UploadedFilePayload = {
+  name: string;
+  base64: string;
+  byteSize?: number;
+  mimeType?: string;
+  kind?: UploadFileKind;
+  width?: number;
+  height?: number;
+};
+
+const _sessionFileCache = new LRUMap<string, UploadedFilePayload[]>(20);
 
 export async function onRequest(context: any) {
   const ctxEnv: Record<string, string | undefined> = context.env ?? process.env;
 
   const body = context.request.body ?? {};
   let message = typeof body.message === "string" ? body.message.trim() : "";
-  const uploadedFiles: Array<{ name: string; base64: string }> =
+  const uploadedFiles: UploadedFilePayload[] =
     body.files ?? [];
 
   // Detect user locale from the language hint appended by the frontend
@@ -177,6 +196,90 @@ export async function onRequest(context: any) {
     });
   }
 
+  if (!Array.isArray(uploadedFiles)) {
+    return new Response(JSON.stringify({ error: "'files' must be an array" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (uploadedFiles.length > MAX_FILES_PER_REQUEST) {
+    return new Response(
+      JSON.stringify({
+        error: `Too many files. Maximum ${MAX_FILES_PER_REQUEST} files per request.`,
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const normalizedFiles: UploadedFilePayload[] = [];
+  let totalUploadBytes = 0;
+
+  for (const file of uploadedFiles) {
+    if (!file || typeof file.name !== "string" || typeof file.base64 !== "string") {
+      return new Response(
+        JSON.stringify({ error: "Each file must include name and base64" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!isSupportedUploadFileName(file.name)) {
+      return new Response(
+        JSON.stringify({
+          error: `${file.name} is not a supported upload type`,
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const estimatedBytes =
+      typeof file.byteSize === "number" && file.byteSize > 0
+        ? file.byteSize
+        : estimateBase64Bytes(file.base64);
+
+    if (estimatedBytes > MAX_SINGLE_FILE_BYTES) {
+      return new Response(
+        JSON.stringify({
+          error: `${file.name} exceeds the per-file limit of ${humanFileSize(MAX_SINGLE_FILE_BYTES)}`,
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const kind = file.kind || getUploadFileKind(file.name);
+    if (
+      kind === "image" &&
+      typeof file.width === "number" &&
+      typeof file.height === "number" &&
+      (file.width > MAX_IMAGE_DIMENSION ||
+        file.height > MAX_IMAGE_DIMENSION ||
+        file.width * file.height > MAX_IMAGE_PIXELS)
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: `${file.name} is too large in pixel dimensions`,
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    totalUploadBytes += estimatedBytes;
+    normalizedFiles.push({
+      ...file,
+      kind,
+      byteSize: estimatedBytes,
+    });
+  }
+
+  if (totalUploadBytes > MAX_TOTAL_UPLOAD_BYTES) {
+    return new Response(
+      JSON.stringify({
+        error: `Total upload size exceeds ${humanFileSize(MAX_TOTAL_UPLOAD_BYTES)}`,
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const signal: AbortSignal | undefined = context.request.signal;
   // EdgeOne Makers auto-injects `context.conversation_id` from the
   // `makers-conversation-id` HTTP header.
@@ -185,20 +288,20 @@ export async function onRequest(context: any) {
 
   // ─── Session file cache: persist uploaded files across follow-up requests ────
   // The EdgeOne sandbox /tmp/ is ephemeral — re-upload cached files on every request.
-  const cachedSessionFiles: Array<{ name: string; base64: string }> =
+  const cachedSessionFiles: UploadedFilePayload[] =
     conversationId ? _sessionFileCache.get(conversationId) ?? [] : [];
 
-  if (conversationId && uploadedFiles.length > 0) {
+  if (conversationId && normalizedFiles.length > 0) {
     // Merge new files with cached ones (new files override existing with same name)
     const mergedMap = new Map(cachedSessionFiles.map((f) => [f.name, f]));
-    uploadedFiles.forEach((f) => mergedMap.set(f.name, f));
+    normalizedFiles.forEach((f) => mergedMap.set(f.name, f));
     _sessionFileCache.set(conversationId, Array.from(mergedMap.values()));
   }
 
   // On follow-up requests (no new files), re-upload all cached files to the (possibly fresh) sandbox
-  const filesToUpload: Array<{ name: string; base64: string }> =
-    uploadedFiles.length > 0
-      ? _sessionFileCache.get(conversationId) ?? uploadedFiles
+  const filesToUpload: UploadedFilePayload[] =
+    normalizedFiles.length > 0
+      ? _sessionFileCache.get(conversationId) ?? normalizedFiles
       : cachedSessionFiles;
   const store = context.store ?? null;
   const cwd = process.cwd();
@@ -207,7 +310,7 @@ export async function onRequest(context: any) {
     `[request] cid=${conversationId}, message="${message.slice(
       0,
       80
-    )}...", files=${uploadedFiles.length}`
+    )}...", files=${normalizedFiles.length}`
   );
 
   // ─── Sandbox readiness check ────────────────────────────────────────────────
@@ -337,7 +440,7 @@ export async function onRequest(context: any) {
   }
 
   // ─── Fallback: inline text file content when sandbox unavailable ─────────────
-  if (!sandboxWorking && uploadedFiles.length > 0) {
+  if (!sandboxWorking && normalizedFiles.length > 0) {
     logger.log(
       "[fallback] sandbox unavailable, inlining text file content into message"
     );
@@ -345,7 +448,7 @@ export async function onRequest(context: any) {
       "\n\n--- FILE CONTENTS (sandbox unavailable, analyze text files below) ---\n";
     const skippedFiles: string[] = [];
 
-    for (const file of uploadedFiles) {
+    for (const file of normalizedFiles) {
       try {
         const content = Buffer.from(file.base64, "base64");
         if (!canInlineFallbackFile(file.name, content)) {
@@ -565,7 +668,7 @@ export async function onRequest(context: any) {
   );
 
   // ─── System prompt (skills-based, dynamic) ───────────────────────────────────
-  const systemPrompt = buildSystemPrompt(uploadedFiles, sandboxWorking, locale);
+  const systemPrompt = buildSystemPrompt(normalizedFiles, sandboxWorking, locale);
 
   // ─── Build query options ──────────────────────────────────────────────────────
   // The Claude Agent SDK spawns the `claude` CLI subprocess with stderr set to
@@ -845,14 +948,14 @@ export async function onRequest(context: any) {
     if (
       !suggestActionsCalled &&
       !deliverFileCalled &&
-      uploadedFiles.length > 0
+      normalizedFiles.length > 0
     ) {
       logger.log(
         "[fallback] AI did not call suggest_actions, generating defaults"
       );
       yield sseEvent({
         type: "suggest_actions",
-        actions: buildDefaultActions(uploadedFiles),
+        actions: buildDefaultActions(normalizedFiles),
       });
     }
 

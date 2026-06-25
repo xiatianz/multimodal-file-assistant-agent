@@ -4,7 +4,7 @@ import { I18nProvider } from '@/lib/i18n';
 
 export const metadata: Metadata = {
   title: 'DocFlix - 智能文档处理与多模态分析 Agent',
-  description: 'DocFlix 是由 AI Agent 驱动的智能多模态文档处理平台。支持 PDF 合并与拆分、Word 与 PDF 格式互转、Excel 导出与 Markdown 转换、智能图片分析以及视频音视频内容提取解析。依托安全的 EdgeOne 沙箱环境，为您提供流畅、隐私安全的一站式办公自动化解决方案。',
+    description: 'DocFlix 是由 AI Agent 驱动的智能文档处理平台。支持 PDF 合并与拆分、Word 与 PDF 格式互转、Excel 导出与 Markdown 转换，以及 PNG/JPG/WebP/GIF/BMP/TIFF 图片分析。依托安全的 EdgeOne 沙箱环境，为您提供流畅、隐私安全的一站式办公自动化解决方案。',
   keywords: [
     'DocFlix',
     '智能文档处理',
@@ -14,7 +14,6 @@ export const metadata: Metadata = {
     'Word转PDF',
     'Excel转Markdown',
     '图片解析',
-    '音视频分析',
     '办公自动化',
     'EdgeOne沙箱'
   ],
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
   publisher: 'DocFlix',
   openGraph: {
     title: 'DocFlix - 智能文档处理与多模态分析 Agent',
-    description: 'DocFlix 是由 AI Agent 驱动的智能多模态文档处理平台。支持 PDF 合并、Word与PDF转换、Excel分析、智能图片分析及视频解析。',
+    description: 'DocFlix 是由 AI Agent 驱动的智能文档处理平台。支持 PDF 合并、Word 与 PDF 转换、Excel 分析，以及 PNG/JPG/WebP/GIF/BMP/TIFF 图片分析。',
     url: 'https://docflix.ai',
     siteName: 'DocFlix',
     locale: 'zh_CN',

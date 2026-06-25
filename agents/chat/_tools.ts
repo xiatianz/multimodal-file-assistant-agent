@@ -3,6 +3,8 @@
  * (TOOLS array and buildToolExecutors removed — now handled by Claude Agent SDK + MCP servers)
  */
 
+import { getUploadFileKind, type UploadFileKind } from "../../lib/file-policy";
+
 /** Shell-safe single-quote wrapping */
 export function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
@@ -31,15 +33,9 @@ export function canInlineFallbackFile(fileName: string, content: Buffer): boolea
 /** Default suggestions per file type for the fallback suggest_actions */
 type ActionItem = { id: string; emoji: string; title: string; description: string };
 
-export function buildDefaultActions(uploadedFiles: Array<{ name: string }>): ActionItem[] {
+export function buildDefaultActions(uploadedFiles: Array<{ name: string; kind?: UploadFileKind }>): ActionItem[] {
   const fileTypes = new Set(uploadedFiles.map(f => {
-    const ext = f.name.split('.').pop()?.toLowerCase() || '';
-    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) return 'image';
-    if (ext === 'pdf') return 'pdf';
-    if (['doc', 'docx'].includes(ext)) return 'word';
-    if (['xls', 'xlsx'].includes(ext)) return 'excel';
-    if (ext === 'csv') return 'csv';
-    return 'text';
+    return f.kind || getUploadFileKind(f.name);
   }));
 
   if (fileTypes.has('image')) {
