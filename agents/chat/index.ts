@@ -118,11 +118,42 @@ async function resolveClaudeSessionBinding(
   return { sessionId };
 }
 
-/** In-process file cache: persists uploaded files across follow-up requests within same process */
-const _sessionFileCache = new Map<
+class LRUMap<K, V> {
+  private max: number;
+  private map: Map<K, V>;
+
+  constructor(max = 20) {
+    this.max = max;
+    this.map = new Map<K, V>();
+  }
+
+  get(key: K): V | undefined {
+    const value = this.map.get(key);
+    if (value !== undefined) {
+      this.map.delete(key);
+      this.map.set(key, value);
+    }
+    return value;
+  }
+
+  set(key: K, value: V): void {
+    if (this.map.has(key)) {
+      this.map.delete(key);
+    } else if (this.map.size >= this.max) {
+      const oldestKey = this.map.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.map.delete(oldestKey);
+      }
+    }
+    this.map.set(key, value);
+  }
+}
+
+/** In-process file cache with LRU eviction: limits concurrent cached sessions to 20 to prevent memory exhaustion */
+const _sessionFileCache = new LRUMap<
   string,
   Array<{ name: string; base64: string }>
->();
+>(20);
 
 export async function onRequest(context: any) {
   const ctxEnv: Record<string, string | undefined> = context.env ?? process.env;
