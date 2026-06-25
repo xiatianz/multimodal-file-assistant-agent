@@ -577,23 +577,20 @@ export default function Home() {
               <defs>
                 <linearGradient id="logo-d-bar" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="100%" stopColor="#dce3ee" />
+                  <stop offset="100%" stopColor="#ccd5e0" />
                 </linearGradient>
                 <linearGradient id="logo-d-loop" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="100%" stopColor="#a4b8d4" />
-                </linearGradient>
-                <linearGradient id="logo-d-inner" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff4d4d" />
-                  <stop offset="100%" stopColor="#990000" />
+                  <stop offset="50%" stopColor="#ebf1f8" />
+                  <stop offset="100%" stopColor="#99a7be" />
                 </linearGradient>
                 <filter id="logo-d-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="-1" dy="1.5" stdDeviation="1" floodColor="#000000" floodOpacity="0.45" />
+                  <feDropShadow dx="1" dy="1.5" stdDeviation="1.2" floodColor="#000000" floodOpacity="0.5" />
                 </filter>
               </defs>
-              <path d="M7 4 H12.5 V28 H7 Z" fill="url(#logo-d-bar)" />
-              <path d="M12.5 9.5 C15.5 9.5 17.5 11.5 17.5 16 C17.5 20.5 15.5 22.5 12.5 22.5 L12.5 28 C20.5 28 23 22 23 16 C23 10 20.5 4 12.5 4 Z" fill="url(#logo-d-inner)" />
-              <path d="M12.5 4 C20.5 4 27 9.4 27 16 C27 22.6 20.5 28 12.5 28 L12.5 22.5 C17.5 22.5 21.5 20 21.5 16 C 21.5 12 17.5 9.5 12.5 9.5 Z" fill="url(#logo-d-loop)" filter="url(#logo-d-shadow)" />
+              <path d="M12.5 16 C 12.5 19.5, 15.5 22, 19.5 22 C 24 22, 26 19.5, 26 16 C 26 12.5, 24 10, 19.5 10 L 12.5 10 L 12.5 4 C 21 4, 27 9, 27 16 C 27 23, 21 28, 12.5 28 L 8 28 L 8 22.5 L 12.5 22.5" fill="url(#logo-d-loop)" />
+              <path d="M7 4 H 12.5 V 28 H 7 Z" fill="url(#logo-d-bar)" filter="url(#logo-d-shadow)" />
+              <path d="M12.5 4 C 18 4, 23.5 7, 25.5 11 L 20.5 13.5 C 19 11.5, 16 9.5, 12.5 9.5 Z" fill="url(#logo-d-loop)" />
             </svg>
           </div>
           <div>
