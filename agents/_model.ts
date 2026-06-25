@@ -16,7 +16,23 @@ export function collectGatewayEnv(env: Record<string, string | undefined>): Reco
   const result: Record<string, string> = {};
   if (env.AI_GATEWAY_BASE_URL) result.ANTHROPIC_BASE_URL = env.AI_GATEWAY_BASE_URL;
   if (env.AI_GATEWAY_API_KEY) result.ANTHROPIC_API_KEY = env.AI_GATEWAY_API_KEY;
-  if (env.ANTHROPIC_CUSTOM_HEADERS) result.ANTHROPIC_CUSTOM_HEADERS = env.ANTHROPIC_CUSTOM_HEADERS;
+  
+  // Inject raw env details into headers so our global interceptor can read them in Cloudflare/EdgeOne environments
+  // where process.env might not be populated in the global scope.
+  const customHeaders: Record<string, string> = {};
+  if (env.AI_GATEWAY_TYPE) customHeaders['x-gateway-type'] = env.AI_GATEWAY_TYPE;
+  if (env.AI_GATEWAY_BASE_URL) customHeaders['x-gateway-base-url'] = env.AI_GATEWAY_BASE_URL;
+  if (env.AI_GATEWAY_API_KEY) customHeaders['x-gateway-api-key'] = env.AI_GATEWAY_API_KEY;
+  
+  if (env.ANTHROPIC_CUSTOM_HEADERS) {
+    try {
+      Object.assign(customHeaders, JSON.parse(env.ANTHROPIC_CUSTOM_HEADERS));
+    } catch(e) {}
+  }
+  
+  if (Object.keys(customHeaders).length > 0) {
+    result.ANTHROPIC_CUSTOM_HEADERS = JSON.stringify(customHeaders);
+  }
   return result;
 }
 
@@ -32,7 +48,20 @@ if (typeof globalThis !== 'undefined') {
     const isMessagesCall = urlStr.includes('/v1/messages');
     
     // Check if the user specified AI_GATEWAY_TYPE=openai in environment
-    const isOpenAI = process.env.AI_GATEWAY_TYPE === 'openai';
+    const headersObj: Record<string, string> = {};
+    if (options?.headers) {
+      if (typeof (options.headers as any).get === 'function') {
+        // Headers object
+        (options.headers as any).forEach((v: string, k: string) => { headersObj[k.toLowerCase()] = v; });
+      } else if (Array.isArray(options.headers)) {
+        for (const [k, v] of options.headers) headersObj[k.toLowerCase()] = v;
+      } else {
+        for (const k in options.headers) headersObj[k.toLowerCase()] = (options.headers as any)[k];
+      }
+    }
+    
+    const gwType = headersObj['x-gateway-type'] || process.env.AI_GATEWAY_TYPE;
+    const isOpenAI = gwType === 'openai';
     
     if (isMessagesCall && isOpenAI && options?.body) {
       try {
@@ -125,16 +154,14 @@ if (typeof globalThis !== 'undefined') {
         };
         
         // Extract key from headers
-        const anthropicApiKey = options.headers ? (options.headers as any)['x-api-key'] || (options.headers as any)['X-Api-Key'] : null;
+        const anthropicApiKey = headersObj['x-api-key'] || headersObj['x-gateway-api-key'];
         const apiKey = anthropicApiKey || process.env.AI_GATEWAY_API_KEY;
         if (apiKey) {
           gatewayHeaders['Authorization'] = `Bearer ${apiKey}`;
         }
         
         // Forward target URL
-        // If the user sets AI_GATEWAY_BASE_URL to a standard OpenAI compatibility endpoint, 
-        // we make requests to `/v1/chat/completions` on that base URL.
-        let baseUrl = process.env.AI_GATEWAY_BASE_URL || 'https://api.openai.com/v1';
+        let baseUrl = headersObj['x-gateway-base-url'] || process.env.AI_GATEWAY_BASE_URL || 'https://api.openai.com/v1';
         if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
         const targetUrl = `${baseUrl}/chat/completions`;
         
