@@ -126,14 +126,14 @@ function ThinkingPanel({
                 <span className={`flex-shrink-0 px-1 py-0.5 rounded text-[10px] font-bold mt-0.5 ${
                   step.type === 'error'
                     ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300'
-                    : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+                    : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'
                 }`}>
                   {step.type === 'error' ? 'ERR' : (isZh ? '操作' : 'ACT')}
                 </span>
                 <span className={`leading-relaxed ${
                   step.type === 'error'
-                    ? 'text-red-600 dark:text-red-300/80'
-                    : 'text-amber-700 dark:text-amber-200/70'
+                    ? 'text-red-600 dark:text-red-300'
+                    : 'text-amber-800 dark:text-amber-200/90'
                 }`}>{step.content}</span>
               </div>
             ))}
@@ -1049,10 +1049,10 @@ export default function Home() {
 
                         {entry.type === 'tool_call' && (
                           <>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-800'}`}>
                               {locale === 'zh' ? '操作' : 'ACT'}
                             </span>
-                            <span className="text-xs text-amber-700 dark:text-amber-200/80">{entry.content}</span>
+                            <span className="text-xs text-amber-800 dark:text-amber-200/90">{entry.content}</span>
                           </>
                         )}
 
