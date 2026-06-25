@@ -99,7 +99,7 @@ const I18nContext = createContext<I18nContextType>({
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   // Default to English for first-time visitors.
-  const [locale, setLocale] = useState<Locale>('en');
+  const [locale, setLocale] = useState<Locale>('zh');
   const t = translations[locale];
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>

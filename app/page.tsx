@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { marked } from 'marked';
 import { useI18n } from '@/lib/i18n';
-import { DeployButtons } from './components/deploy-buttons';
 
 // Configure marked for GFM tables
 marked.setOptions({ gfm: true, breaks: true });
@@ -74,23 +73,23 @@ function ThinkingPanel({
   const stepCount = steps.length;
 
   return (
-    <div className={`rounded-xl border overflow-hidden text-xs ${isDark ? 'bg-gray-900/50 border-gray-700/50' : 'bg-gray-50/90 border-gray-200'}`}>
+    <div className="rounded-xl border border-gray-200 dark:border-gray-750/50 bg-gray-50/90 dark:bg-gray-900/50 overflow-hidden text-xs">
       {/* Header */}
       <button
         onClick={onToggle}
-        className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors ${isDark ? 'hover:bg-gray-800/40' : 'hover:bg-gray-100/80'}`}
+        className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-gray-100/80 dark:hover:bg-gray-800/40"
       >
         {isLive ? (
           <span className="w-3 h-3 rounded-full border-2 border-blue-400 border-t-transparent animate-spin flex-shrink-0" />
         ) : (
           <svg
-            className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'} ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
+            className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'} text-gray-400 dark:text-gray-500`}
             fill="none" viewBox="0 0 24 24" stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         )}
-        <span className={`font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+        <span className="font-medium text-gray-500 dark:text-gray-400">
           {isLive
             ? (isZh ? '处理中...' : 'Processing...')
             : stepCount > 0
@@ -98,7 +97,7 @@ function ThinkingPanel({
               : (isZh ? '思考过程' : 'Thinking')}
         </span>
         {!isLive && stepCount > 0 && (
-          <span className={`ml-auto ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+          <span className="ml-auto text-gray-400 dark:text-gray-600">
             {collapsed ? '▼' : '▲'}
           </span>
         )}
@@ -106,26 +105,26 @@ function ThinkingPanel({
 
       {/* Steps */}
       {!collapsed && (
-        <div className={`border-t ${isDark ? 'border-gray-700/40' : 'border-gray-100'}`}>
+        <div className="border-t border-gray-100 dark:border-gray-700/40">
           <div className="px-3 py-2.5 space-y-1.5">
             {steps.map((step, i) => (
               <div key={i} className="flex items-start gap-2">
                 <span className={`flex-shrink-0 px-1 py-0.5 rounded text-[10px] font-medium mt-0.5 ${
                   step.type === 'error'
-                    ? (isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-50 text-red-600')
-                    : (isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-700')
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300'
+                    : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
                 }`}>
                   {step.type === 'error' ? 'ERR' : (isZh ? '操作' : 'ACT')}
                 </span>
                 <span className={`leading-relaxed ${
                   step.type === 'error'
-                    ? (isDark ? 'text-red-300/80' : 'text-red-600')
-                    : (isDark ? 'text-amber-200/70' : 'text-amber-700')
+                    ? 'text-red-600 dark:text-red-300/80'
+                    : 'text-amber-700 dark:text-amber-200/70'
                 }`}>{step.content}</span>
               </div>
             ))}
             {isLive && (
-              <div className={`flex items-center gap-1.5 pt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+              <div className="flex items-center gap-1.5 pt-0.5 text-gray-400 dark:text-gray-600">
                 <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
                 <span>{isZh ? '等待下一步操作...' : 'Waiting for next action...'}</span>
               </div>
@@ -251,6 +250,8 @@ export default function Home() {
   const [conversationId] = useState(() => crypto.randomUUID());
   const [tokenUsage, setTokenUsage] = useState({ input: 0, output: 0 });
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const activityEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -265,6 +266,15 @@ export default function Home() {
   }, [activities]);
 
   useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') {
+      setTheme(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
     document.documentElement.className = theme;
   }, [theme]);
 
@@ -541,7 +551,7 @@ export default function Home() {
 
   return (
     <div
-      className={`h-screen flex flex-col ${isDark ? 'bg-[#0a0a0f] text-gray-100' : 'bg-gray-50 text-gray-900'}`}
+      className="h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -549,10 +559,10 @@ export default function Home() {
     >
       {/* Drag overlay */}
       {isDragging && (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none border-2 border-dashed rounded-lg m-3 ${isDark ? 'bg-blue-950/60 border-blue-400' : 'bg-blue-50/80 border-blue-400'}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none border-2 border-dashed rounded-lg m-3 bg-blue-50/90 dark:bg-slate-900/90 border-blue-400 dark:border-blue-500/50">
           <div className="text-center">
             <div className="text-4xl mb-2">📂</div>
-            <p className={`text-sm font-medium ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
+            <p className="text-sm font-semibold text-blue-500">
               {locale === 'zh' ? '释放以上传文件' : 'Drop files to upload'}
             </p>
           </div>
@@ -560,367 +570,553 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className={`flex-shrink-0 ${isDark ? 'bg-[#12121a] border-gray-800/60' : 'bg-white border-gray-200'} border-b px-5 py-3 flex items-center justify-between`}>
+      <header className="flex-shrink-0 bg-[var(--card-bg)] border-b border-[var(--border-color)] px-6 py-4 flex items-center justify-between z-10 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-blue-600/20' : 'bg-blue-100'}`}>
-            <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#090b11] border border-gray-800 flex-shrink-0 shadow-md">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="netflix-red-1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#E50914" />
+                  <stop offset="100%" stopColor="#9C070F" />
+                </linearGradient>
+                <linearGradient id="netflix-red-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#F51522" />
+                  <stop offset="50%" stopColor="#E50914" />
+                  <stop offset="100%" stopColor="#B81D24" />
+                </linearGradient>
+                <linearGradient id="netflix-red-3" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#E50914" />
+                  <stop offset="100%" stopColor="#7A050B" />
+                </linearGradient>
+                <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="-1" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.6"/>
+                </filter>
+              </defs>
+              <path d="M7 4H12V28H7V4Z" fill="url(#netflix-red-1)" />
+              <path d="M12 4C20.5 4 26 9.5 26 16C26 22.5 20.5 28 12 28H15C21.5 28 26 22.5 26 16C26 9.5 21.5 4 15 4H12Z" fill="url(#netflix-red-2)" filter="url(#shadow)" />
+              <path d="M12 4H10C17.5 4 23 9.5 23 16C23 22.5 17.5 28 10 28H12C19.5 28 25 22.5 25 16C25 9.5 19.5 4 12 4Z" fill="url(#netflix-red-3)" opacity="0.85" />
             </svg>
           </div>
-          <h1 className={`text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-            {locale === 'zh' ? '智能文档处理' : 'Smart Doc Processor'}
-          </h1>
-          <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`} />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="flex items-baseline">
+                <span className="text-xl font-black tracking-tighter text-[#E50914] font-sans">
+                  DOC
+                </span>
+                <span className="text-xl font-black tracking-tighter text-gray-800 dark:text-gray-100 font-sans ml-0.5">
+                  FLIX
+                </span>
+              </h1>
+              <span className="hidden sm:inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
+                {locale === 'zh' ? '智能文档' : 'AI Doc'}
+              </span>
+              <div className={`w-2.5 h-2.5 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <DeployButtons
-            templateSlug="multimodal-file-assistant-agent"
-            githubUrl="https://github.com/edgeone-pages-test/multimodal-file-assistant-agent"
-            lang={locale}
-          />
+        <div className="flex items-center gap-2 sm:gap-3">
+
           {tokenUsage.input > 0 && (
-            <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+            <span className="hidden sm:inline-block text-xs px-2.5 py-1.5 rounded-xl font-mono nm-pressed border border-[var(--border-color)] text-gray-600 dark:text-gray-300">
               {(tokenUsage.input + tokenUsage.output).toLocaleString()} tokens
             </span>
           )}
+          {/* Toggle Workspace Button (Visible only on mobile/tablet) */}
+          <button
+            onClick={() => setWorkspaceOpen(!workspaceOpen)}
+            className={`lg:hidden flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-xl transition-all border border-[var(--border-color)] nm-button ${workspaceOpen ? 'active text-blue-500' : 'text-gray-600 dark:text-gray-300 dark:text-gray-300'}`}
+          >
+            📂 {files.length > 0 ? `${files.length}` : '文件'}
+          </button>
           <button onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-            className={`px-2.5 py-1.5 text-xs rounded-md transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>
-            {locale === 'zh' ? 'EN' : '中'}
+            className="px-3 py-1.5 text-sm font-semibold rounded-xl transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300 dark:text-gray-300">
+            {locale === 'zh' ? 'EN' : '中文'}
           </button>
           <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className={`px-2.5 py-1.5 text-xs rounded-md transition-colors ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>
+            className="px-3 py-1.5 text-sm font-semibold rounded-xl transition-all border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300 dark:text-gray-300">
             {isDark ? '☀️' : '🌙'}
           </button>
         </div>
       </header>
 
-      {/* Main */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Activity feed */}
-        <div className="flex-1 overflow-y-auto px-4 py-5 space-y-3">
-
-          {/* Empty state */}
-          {!hasConversation && (
-            <div className="flex flex-col items-center justify-center h-full gap-5">
-              <div className="text-center max-w-sm">
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${isDark ? 'bg-blue-600/10' : 'bg-blue-50'}`}>
-                  <svg className={`w-8 h-8 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h2 className={`text-base font-semibold mb-1.5 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                  {locale === 'zh' ? '智能文档处理' : 'Smart Document Processor'}
+      {/* Main Panel */}
+      <main className="flex-1 flex overflow-hidden p-4 sm:p-6 bg-[var(--background)]">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1600px] w-full mx-auto h-full overflow-hidden relative">
+          
+          {/* Left Column: File Workspace */}
+          <div className={`${
+            workspaceOpen 
+              ? 'absolute inset-0 z-20 flex bg-[var(--background)]' 
+              : 'hidden lg:flex'
+          } lg:col-span-4 xl:col-span-3 flex-col nm-flat rounded-2xl p-5 border border-[var(--border-color)] overflow-hidden h-full`}>
+            
+            {/* Sidebar header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)] mb-4 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📁</span>
+                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {locale === 'zh' ? '文件控制中心' : 'File Workspace'}
                 </h2>
-                <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {t.emptyHint}
-                </p>
-
-                {/* Upload area */}
+              </div>
+              {files.length > 0 && (
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isProcessing}
-                  className={`w-full max-w-xs mx-auto flex flex-col items-center gap-2.5 px-6 py-6 rounded-2xl border-2 border-dashed transition-all disabled:opacity-50 ${isDark
-                    ? 'border-gray-700 hover:border-blue-500 hover:bg-blue-600/5 text-gray-500 hover:text-blue-400'
-                    : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-400 hover:text-blue-500'
-                  }`}
+                  onClick={() => {
+                    setFiles([]);
+                    sentFileIds.current.clear();
+                  }}
+                  className="text-xs text-red-500 hover:text-red-600 font-medium px-2 py-1 rounded-lg transition-colors hover:bg-red-500/10"
                 >
-                  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <span className="text-sm font-medium">
-                    {locale === 'zh' ? '点击上传文件' : 'Click to upload files'}
-                  </span>
-                  <span className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                    {t.supportedTypes}
-                  </span>
+                  {locale === 'zh' ? '清空' : 'Clear'}
                 </button>
+              )}
+            </div>
 
-                <div className={`mt-3 flex items-center gap-3 text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                  <span className="flex-1 h-px bg-current opacity-20" />
-                  <span>{locale === 'zh' ? '或' : 'or'}</span>
-                  <span className="flex-1 h-px bg-current opacity-20" />
-                </div>
-
-                <button onClick={loadSamples} disabled={isProcessing}
-                  className={`mt-3 px-5 py-2 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700' : 'bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 shadow-sm'}`}>
-                  {t.importSample}
-                </button>
+            {/* Compact Drag & Drop Upload Zone */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="group nm-pressed rounded-xl p-5 border border-dashed border-gray-300 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer flex flex-col items-center gap-2 text-center transition-all mb-4 hover:scale-[0.99] active:scale-[0.98] flex-shrink-0"
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center nm-flat border border-[var(--border-color)] text-gray-400 group-hover:text-blue-500 transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 block group-hover:text-blue-500 transition-colors">
+                  {locale === 'zh' ? '上传文档/表格/图片' : 'Upload Files'}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">
+                  {locale === 'zh' ? '拖拽或点击浏览' : 'Drag & drop or click'}
+                </span>
               </div>
             </div>
-          )}
 
-          {/* Activity entries */}
-          {activities.map((entry) => {
-
-            // ── Thinking group (collapsible) ──
-            if (entry.type === 'thinking_group') {
-              const steps: ThinkingStep[] = entry.meta?.steps || [];
-              // Only show the thinking panel when there is at least one tool
-              // step. Pure text Q&A (no tool calls) should never render the
-              // "Processing.../Waiting for next action..." panel — even while
-              // the run is live — since there is no agent action to show.
-              if (steps.length === 0) return null;
-              return (
-                <div key={entry.id} className="flex items-start gap-3 min-w-0 max-w-3xl mx-auto w-full">
-                  <span className={`text-[10px] font-mono mt-3 w-14 flex-shrink-0 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{timeStr(entry.timestamp)}</span>
-                  <div className="flex-1 min-w-0">
-                    <ThinkingPanel
-                      steps={steps}
-                      collapsed={entry.meta?.collapsed ?? false}
-                      isLive={entry.meta?.isLive ?? false}
-                      onToggle={() => {
-                        setActivities((prev) => prev.map((a) =>
-                          a.id === entry.id
-                            ? { ...a, meta: { ...a.meta, collapsed: !a.meta?.collapsed } }
-                            : a
-                        ));
-                      }}
-                      isDark={isDark}
-                      locale={locale}
-                    />
-                  </div>
-                </div>
-              );
-            }
-
-            // ── Retry card ──
-            if (entry.type === 'retry_card') {
-              return (
-                <div key={entry.id} className="flex items-start gap-3 min-w-0 max-w-3xl mx-auto w-full">
-                  <span className={`text-[10px] font-mono mt-1 w-14 flex-shrink-0 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{timeStr(entry.timestamp)}</span>
-                  <div className={`flex-1 rounded-xl border p-3.5 ${isDark ? 'bg-red-950/10 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
-                    <p className={`text-xs mb-3 ${isDark ? 'text-red-300' : 'text-red-600'}`}>
-                      ⚠️ {entry.content}
-                    </p>
-                    <button
-                      onClick={() => sendMessage(entry.meta?.message)}
-                      disabled={isProcessing}
-                      className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${isDark
-                        ? 'bg-red-900/30 hover:bg-red-900/50 text-red-300 border border-red-800/40'
-                        : 'bg-white hover:bg-red-50 text-red-600 border border-red-200 shadow-sm'
-                      }`}
-                    >
-                      🔄 {locale === 'zh' ? '重新操作' : 'Retry'}
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            // ── Standard entries ──
-            return (
-              <div key={entry.id} className="flex items-start gap-3 min-w-0 max-w-3xl mx-auto w-full">
-                <span className={`text-[10px] font-mono mt-1 w-14 flex-shrink-0 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{timeStr(entry.timestamp)}</span>
-
-                {entry.type === 'user' && (
-                  <>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${isDark ? 'bg-blue-600/20 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>YOU</span>
-                    <p className={`text-sm ${isDark ? 'text-blue-200' : 'text-blue-700'}`}>{entry.content}</p>
-                  </>
-                )}
-
-                {entry.type === 'system' && (
-                  <p className={`text-xs italic ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{entry.content}</p>
-                )}
-
-                {/* tool_call kept for legacy/fallback rendering */}
-                {entry.type === 'tool_call' && (
-                  <>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
-                      {locale === 'zh' ? '操作' : 'ACT'}
-                    </span>
-                    <span className={`text-xs ${isDark ? 'text-amber-200/80' : 'text-amber-700'}`}>{entry.content}</span>
-                  </>
-                )}
-
-                {entry.type === 'suggestions' && entry.meta?.actions && (
-                  <div className="flex-1 min-w-0">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                      {(entry.meta.actions as Array<{ id: string; emoji: string; title: string; description: string }>).map((action) => (
-                        <button
-                          key={action.id}
-                          onClick={() => sendMessage(action.title)}
-                          disabled={isProcessing}
-                          className={`text-left px-3.5 py-3 rounded-xl border transition-all disabled:opacity-50 ${isDark
-                            ? 'bg-gray-800/40 hover:bg-gray-700/60 border-gray-700/60 hover:border-blue-500/50'
-                            : 'bg-white hover:bg-blue-50 border-gray-200 hover:border-blue-300 shadow-sm'
-                          }`}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <span className="text-base flex-shrink-0 mt-0.5">{action.emoji}</span>
-                            <div className="min-w-0">
-                              <p className={`text-xs font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{action.title}</p>
-                              <p className={`text-[11px] mt-0.5 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{action.description}</p>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {entry.type === 'text' && (
-                  <>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${isDark ? 'bg-gray-700/60 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>AI</span>
-                    <div className="flex-1 min-w-0 overflow-x-auto">
-                      <StreamingText content={entry.content} isStreaming={isProcessing && entry.id === activities[activities.length - 1]?.id} />
-                    </div>
-                  </>
-                )}
-
-                {entry.type === 'file_download' && (
-                  <>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${isDark ? 'bg-emerald-900/20 text-emerald-300' : 'bg-emerald-50 text-emerald-700'}`}>FILE</span>
-                    <span className={`text-xs ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                      {locale === 'zh' ? '文件已生成 ↓' : 'File ready ↓'}
-                    </span>
-                  </>
-                )}
-
-                {entry.type === 'error' && (
-                  <>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-600'}`}>ERR</span>
-                    <pre className={`text-xs overflow-x-auto max-h-20 overflow-y-auto flex-1 p-1.5 rounded ${isDark ? 'text-red-300/80 bg-red-900/10' : 'text-red-600 bg-red-50'}`}>
-                      {entry.content.slice(0, 500)}
-                    </pre>
-                  </>
-                )}
-              </div>
-            );
-          })}
-
-          {isProcessing && (
-            <div className={`flex items-center gap-2 text-xs py-1 max-w-3xl mx-auto w-full ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              {locale === 'zh' ? '处理中...' : 'Processing...'}
-            </div>
-          )}
-
-          {/* File downloads */}
-          {!isProcessing && activities.filter((a) => a.type === 'file_download').length > 0 && (
-            <div className={`mt-4 p-4 rounded-xl border max-w-3xl mx-auto w-full ${isDark ? 'bg-emerald-950/10 border-emerald-800/30' : 'bg-emerald-50/50 border-emerald-200'}`}>
-              <p className={`text-xs font-medium mb-2.5 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
-                📥 {locale === 'zh' ? '可下载文件' : 'Downloads'}
-              </p>
-              <div className="space-y-2">
-                {activities.filter((a) => a.type === 'file_download').map((entry) => (
-                  <a key={entry.id}
-                    href={`data:application/octet-stream;base64,${entry.meta?.base64 || ''}`}
-                    download={entry.content}
-                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-colors ${isDark ? 'bg-gray-800/40 border-emerald-800/30 hover:bg-emerald-950/30' : 'bg-white border-emerald-200 hover:bg-emerald-50 shadow-sm'}`}>
-                    <svg className={`w-4 h-4 flex-shrink-0 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    <span className={`text-xs font-medium ${isDark ? 'text-emerald-200' : 'text-emerald-700'}`}>{entry.content}</span>
-                    {entry.meta?.description && (
-                      <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>— {entry.meta.description.slice(0, 50)}</span>
-                    )}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div ref={activityEndRef} />
-        </div>
-
-        {/* Input area */}
-        <div className={`flex-shrink-0 border-t ${isDark ? 'border-gray-800/60 bg-[#0f0f17]' : 'border-gray-200 bg-white'} px-4 pt-3 pb-4`}>
-          <div className="max-w-3xl mx-auto">
-
-            {/* Queued file chips */}
-            {queuedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {queuedFiles.map((f) => (
-                  <span
-                    key={f.id}
-                    className={`inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${isDark
-                      ? 'bg-blue-950/40 border-blue-800/50 text-blue-300'
-                      : 'bg-blue-50 border-blue-200 text-blue-700'
-                    }`}
-                  >
-                    <span>{getFileIcon(f.type)}</span>
-                    <span className="max-w-[140px] truncate">{f.name}</span>
-                    <button
-                      onClick={() => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
-                      className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors ${isDark ? 'text-blue-400 hover:bg-blue-800/60 hover:text-white' : 'text-blue-400 hover:bg-blue-200 hover:text-blue-700'}`}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-                {queuedFiles.length > 1 && (
+            {/* File list scrollarea */}
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+              {files.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                  <span className="text-3xl mb-2 opacity-40">📊</span>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {locale === 'zh' ? '工作区暂无文件' : 'No files in workspace'}
+                  </p>
                   <button
-                    onClick={() => {
-                      setFiles((prev) => prev.filter((f) => sentFileIds.current.has(f.id)));
-                    }}
-                    className={`text-[11px] px-2 py-1 rounded-full transition-colors ${isDark ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}
+                    onClick={loadSamples}
+                    disabled={isProcessing}
+                    className="mt-4 px-4 py-2 text-sm font-semibold rounded-xl border border-[var(--border-color)] nm-button text-blue-500 hover:text-blue-600 active:scale-95 disabled:opacity-50"
                   >
-                    {locale === 'zh' ? '清空' : 'Clear all'}
+                    {locale === 'zh' ? '导入示例文件' : 'Import Samples'}
+                  </button>
+                </div>
+              ) : (
+                files.map((file) => {
+                  const isQueued = !sentFileIds.current.has(file.id);
+                  return (
+                    <div
+                      key={file.id}
+                      className="flex items-center justify-between p-3 rounded-xl nm-flat border border-[var(--border-color)] hover:scale-[1.01] transition-transform"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-lg flex-shrink-0">{getFileIcon(file.type)}</span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold truncate text-gray-800 dark:text-gray-200">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-450">
+                            {file.size}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Status badges */}
+                        {file.status === 'processing' ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                        ) : isQueued ? (
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                            {locale === 'zh' ? '待发送' : 'Queued'}
+                          </span>
+                        ) : (
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                            {locale === 'zh' ? '已分析' : 'Loaded'}
+                          </span>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            setFiles((prev) => prev.filter((f) => f.id !== file.id));
+                            sentFileIds.current.delete(file.id);
+                          }}
+                          title={locale === 'zh' ? '移除文件' : 'Remove file'}
+                          className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Bottom Action buttons */}
+            {files.length > 0 && (
+              <div className="pt-4 border-t border-[var(--border-color)] mt-4 space-y-2 flex-shrink-0">
+                <button
+                  onClick={() => sendMessage(t.suggestPrompt, true)}
+                  disabled={isProcessing || !files.some(f => !sentFileIds.current.has(f.id))}
+                  className="w-full py-2.5 text-xs font-bold rounded-xl transition-all nm-button-primary disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  🚀 {locale === 'zh' ? '开始分析新上传文件' : 'Analyze Queue'}
+                </button>
+                {files.every(f => sentFileIds.current.has(f.id)) && (
+                  <button
+                    onClick={loadSamples}
+                    disabled={isProcessing}
+                    className="w-full py-2.5 text-sm font-semibold rounded-xl transition-all nm-button border border-[var(--border-color)] text-gray-600 dark:text-gray-300"
+                  >
+                    🔄 {locale === 'zh' ? '导入更多示例文件' : 'Import Samples'}
                   </button>
                 )}
               </div>
             )}
 
-            {/* Input row */}
-            <div className={`flex items-end gap-2 rounded-2xl border p-2 transition-colors ${isDark
-              ? 'bg-gray-900 border-gray-700 focus-within:border-blue-600'
-              : 'bg-white border-gray-200 shadow-sm focus-within:border-blue-400'
-            }`}>
-              {/* Attach button */}
+            {/* Close Mobile Workspace overlay */}
+            {workspaceOpen && (
               <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isProcessing}
-                title={locale === 'zh' ? '上传文件' : 'Attach files'}
-                className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl transition-colors disabled:opacity-40 ${isDark
-                  ? 'text-gray-400 hover:text-blue-400 hover:bg-blue-600/10'
-                  : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50'
-                }`}
+                onClick={() => setWorkspaceOpen(false)}
+                className="mt-4 w-full py-2.5 text-sm font-semibold rounded-xl border border-[var(--border-color)] nm-button text-gray-600 dark:text-gray-300 lg:hidden flex-shrink-0"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                </svg>
+                {locale === 'zh' ? '返回对话控制台' : 'Back to Chat'}
               </button>
+            )}
+          </div>
 
-              {/* Text input */}
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onCompositionStart={() => { isComposingRef.current = true; }}
-                onCompositionEnd={() => { isComposingRef.current = false; }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && !isComposingRef.current) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                placeholder={locale === 'zh' ? '输入指令... (合并 PDF / 数据分析 / 格式转换)' : 'Enter command... (merge PDF / analyze / convert)'}
-                disabled={isProcessing}
-                className={`flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-50 py-1 px-1 ${isDark ? 'text-gray-100 placeholder-gray-600' : 'text-gray-900 placeholder-gray-400'}`}
-              />
+          {/* Right Column: Chat Window */}
+          <div className="lg:col-span-8 xl:col-span-9 flex flex-col nm-flat rounded-2xl p-5 border border-[var(--border-color)] overflow-hidden h-full">
+            
+            {/* Activities Scroll Area */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1 mb-4 flex flex-col justify-between">
+              
+              <div className="space-y-4 w-full">
+                {!hasConversation ? (
+                  // Elegant welcome guide inside chat console
+                  <div className="py-12 px-4 flex flex-col items-center justify-center text-center h-full max-w-2xl mx-auto">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center nm-flat border border-[var(--border-color)] text-blue-500 mb-6 animate-pulse">
+                      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                      </svg>
+                    </div>
+                    
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">
+                      {locale === 'zh' ? 'DocFlix 智能多模态文档助理' : 'DocFlix Smart Doc Assistant'}
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                      {locale === 'zh' 
+                        ? '您好！我是您的智能文档处理助手。请在左侧添加文档（支持 PDF、Word、Excel、Markdown、CSV、图片及音视频），然后在这里输入分析、转换或合并指令。'
+                        : 'Hello! I am your AI Document Agent. Upload files on the left and enter analysis, conversion or merge commands below.'}
+                    </p>
 
-              {/* Send button */}
-              <button
-                onClick={() => sendMessage()}
-                disabled={!userInput.trim() || isProcessing}
-                className={`flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-xl transition-all disabled:opacity-40 ${isDark ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20' : 'bg-blue-500 hover:bg-blue-400 text-white shadow-md shadow-blue-200'}`}>
-                {isProcessing ? '...' : locale === 'zh' ? '发送' : 'Send'}
-              </button>
+                    {/* Quick Command Chips */}
+                    <div className="w-full space-y-3 text-left">
+                      <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-1">
+                        {locale === 'zh' ? '💡 常用指令推荐' : '💡 Recommended Commands'}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {[
+                          {
+                            title: locale === 'zh' ? '📊 推荐处理方案' : '📊 Suggest plans',
+                            desc: locale === 'zh' ? '自动检查左侧已载入的文件，给出最佳分析和处理方案' : 'Check files and suggest analytical actions',
+                            cmd: locale === 'zh' ? '我上传了这些文件，请分析它们的基本信息并给我推荐几个处理方案' : 'I uploaded these files, please analyze them and recommend processing plans.'
+                          },
+                          {
+                            title: locale === 'zh' ? '📖 汇总文档核心摘要' : '📖 Document summary',
+                            desc: locale === 'zh' ? '阅读加载的文件，提取出最核心的关键内容 and 决策要点' : 'Read loaded files and generate executive summary',
+                            cmd: locale === 'zh' ? '请阅读我加载的文件，并为我写一份简洁的核心内容摘要' : 'Please read the loaded files and write a concise executive summary.'
+                          },
+                          {
+                            title: locale === 'zh' ? '📋 将表格转换格式' : '📋 Convert spreadsheet',
+                            desc: locale === 'zh' ? '将 CSV 或 Excel 数据转换为 Markdown 表格，并做汇总' : 'Convert CSV or Excel data to markdown table',
+                            cmd: locale === 'zh' ? '请把数据表格转换为 Markdown 格式展示' : 'Please convert the loaded spreadsheet into Markdown format.'
+                          },
+                          {
+                            title: locale === 'zh' ? '🔗 合并 PDF 文档' : '🔗 Merge PDFs',
+                            desc: locale === 'zh' ? '如果左侧包含多份 PDF，一键合并它们并附带页码' : 'Merge multiple PDF files into one output',
+                            cmd: locale === 'zh' ? '帮我把工作区里的 PDF 文件合并成一份，并确保格式完好' : 'Help me merge the PDF files in the workspace into one.'
+                          }
+                        ].map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => sendMessage(item.cmd)}
+                            disabled={isProcessing}
+                            className="p-4 text-left rounded-2xl border border-[var(--border-color)] nm-flat hover:scale-[1.01] transition-all group flex flex-col justify-between text-sm"
+                          >
+                            <p className="text-xs font-bold text-gray-800 dark:text-gray-800 dark:text-gray-205 group-hover:text-blue-500 transition-colors">
+                              {item.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                              {item.desc}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  activities.map((entry) => {
+                    // ── Thinking group (collapsible) ──
+                    if (entry.type === 'thinking_group') {
+                      const steps: ThinkingStep[] = entry.meta?.steps || [];
+                      if (steps.length === 0) return null;
+                      return (
+                        <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
+                          <span className="text-xs font-mono mt-3 w-14 flex-shrink-0 text-gray-500 dark:text-gray-400">{timeStr(entry.timestamp)}</span>
+                          <div className="flex-1 min-w-0">
+                            <ThinkingPanel
+                              steps={steps}
+                              collapsed={entry.meta?.collapsed ?? false}
+                              isLive={entry.meta?.isLive ?? false}
+                              onToggle={() => {
+                                setActivities((prev) => prev.map((a) =>
+                                  a.id === entry.id
+                                    ? { ...a, meta: { ...a.meta, collapsed: !a.meta?.collapsed } }
+                                    : a
+                                ));
+                              }}
+                              isDark={isDark}
+                              locale={locale}
+                            />
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // ── Retry card ──
+                    if (entry.type === 'retry_card') {
+                      return (
+                        <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
+                          <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-400">{timeStr(entry.timestamp)}</span>
+                          <div className="flex-1 rounded-2xl border p-4 bg-red-50 dark:bg-red-950/15 border-red-200 dark:border-red-800/30">
+                            <p className="text-xs mb-3 text-red-600 dark:text-red-300">
+                              ⚠️ {entry.content}
+                            </p>
+                            <button
+                              onClick={() => sendMessage(entry.meta?.message)}
+                              disabled={isProcessing}
+                              className="px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all nm-button text-red-500 border border-red-200 shadow-sm"
+                            >
+                              🔄 {locale === 'zh' ? '重新操作' : 'Retry'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // ── Standard entries ──
+                    return (
+                      <div key={entry.id} className="flex items-start gap-3 min-w-0 w-full">
+                        <span className="text-xs font-mono mt-1 w-14 flex-shrink-0 text-gray-500 dark:text-gray-400">{timeStr(entry.timestamp)}</span>
+
+                        {entry.type === 'user' && (
+                          <>
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400">YOU</span>
+                            <p className="text-[15px] leading-relaxed text-blue-900 dark:text-blue-100">{entry.content}</p>
+                          </>
+                        )}
+
+                        {entry.type === 'system' && (
+                          <p className="text-sm italic text-gray-600 dark:text-gray-400">{entry.content}</p>
+                        )}
+
+                        {/* tool_call kept for legacy/fallback rendering */}
+                        {entry.type === 'tool_call' && (
+                          <>
+                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-lg flex-shrink-0 ${isDark ? 'bg-amber-900/20 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
+                              {locale === 'zh' ? '操作' : 'ACT'}
+                            </span>
+                            <span className="text-xs text-amber-700 dark:text-amber-200/80">{entry.content}</span>
+                          </>
+                        )}
+
+                        {entry.type === 'suggestions' && entry.meta?.actions && (
+                          <div className="flex-1 min-w-0">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                              {(entry.meta.actions as Array<{ id: string; emoji: string; title: string; description: string }>).map((action) => (
+                                <button
+                                  key={action.id}
+                                  onClick={() => sendMessage(action.title)}
+                                  disabled={isProcessing}
+                                  className="text-left px-4 py-3 rounded-2xl border border-[var(--border-color)] nm-flat hover:scale-[1.01] transition-all disabled:opacity-50"
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <span className="text-base flex-shrink-0 mt-0.5">{action.emoji}</span>
+                                    <div className="min-w-0">
+                                      <p className={`text-xs font-bold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{action.title}</p>
+                                      <p className={`text-[10px] mt-0.5 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{action.description}</p>
+                                    </div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {entry.type === 'text' && (
+                          <>
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0 bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300">AI</span>
+                            <div className="flex-1 min-w-0 overflow-x-auto">
+                              <StreamingText content={entry.content} isStreaming={isProcessing && entry.id === activities[activities.length - 1]?.id} />
+                            </div>
+                          </>
+                        )}
+
+                        {entry.type === 'file_download' && (
+                          <>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0 ${isDark ? 'bg-emerald-900/20 text-emerald-400 dark:text-emerald-300' : 'bg-emerald-50 text-emerald-700'}`}>FILE</span>
+                            <span className={`text-sm font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                              {locale === 'zh' ? '生成文件可用 ↓' : 'File ready ↓'}
+                            </span>
+                          </>
+                        )}
+
+                        {entry.type === 'error' && (
+                          <>
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300">ERR</span>
+                            <pre className={`text-xs overflow-x-auto max-h-20 overflow-y-auto flex-1 p-2 rounded-xl border border-[var(--border-color)] ${isDark ? 'text-red-300 bg-red-950/10' : 'text-red-600 dark:text-red-400 bg-red-50'}`}>
+                              {entry.content.slice(0, 500)}
+                            </pre>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+
+                {isProcessing && (
+                  <div className={`flex items-center gap-2 text-xs py-1 pl-16 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    {locale === 'zh' ? '助理正在执行中...' : 'Processing...'}
+                  </div>
+                )}
+
+                {/* File downloads history list */}
+                {!isProcessing && activities.filter((a) => a.type === 'file_download').length > 0 && (
+                  <div className="mt-6 p-4 rounded-2xl border border-[var(--border-color)] nm-pressed w-full">
+                    <p className="text-sm font-bold mb-3 text-emerald-600 dark:text-emerald-400">
+                      📥 {locale === 'zh' ? '已生成的可下载文件' : 'Generated Downloads'}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {activities.filter((a) => a.type === 'file_download').map((entry) => (
+                        <a key={entry.id}
+                          href={`data:application/octet-stream;base64,${entry.meta?.base64 || ''}`}
+                          download={entry.content}
+                          className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border border-[var(--border-color)] nm-flat hover:scale-[1.01] transition-all hover:bg-emerald-500/5">
+                          <svg className="w-4 h-4 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          <div className="min-w-0">
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate block">{entry.content}</span>
+                            {entry.meta?.description && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400 block truncate mt-0.5">{entry.meta.description}</span>
+                            )}
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div ref={activityEndRef} />
             </div>
 
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileSelect}
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.json,.xml,.html"
-            />
+            {/* Bottom Input Area */}
+            <div className="pt-3 border-t border-[var(--border-color)] flex-shrink-0">
+              
+              {/* Dynamic queued files mini chips above text input */}
+              {queuedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3 px-1">
+                  {queuedFiles.map((f) => (
+                    <span
+                      key={f.id}
+                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-semibold border border-blue-200 dark:border-blue-900 bg-blue-500/5 text-blue-600 dark:text-blue-400 dark:text-blue-400"
+                    >
+                      <span>{getFileIcon(f.type)}</span>
+                      <span className="max-w-[130px] truncate">{f.name}</span>
+                      <button
+                        onClick={() => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
+                        className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-blue-500/20 text-blue-400 hover:text-blue-600"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  {queuedFiles.length > 1 && (
+                    <button
+                      onClick={() => setFiles((prev) => prev.filter((f) => sentFileIds.current.has(f.id)))}
+                      className="text-[11px] text-gray-400 dark:text-gray-500 hover:text-red-500 hover:underline px-2 py-1 transition-colors"
+                    >
+                      {locale === 'zh' ? '清空待发' : 'Clear Queue'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Input bar */}
+              <div className="flex items-end gap-2 rounded-2xl p-2 nm-pressed border border-[var(--border-color)]">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessing}
+                  title={locale === 'zh' ? '选择上传文件' : 'Attach files'}
+                  className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all nm-button border border-[var(--border-color)] text-gray-400 hover:text-blue-500"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                </button>
+
+                <input
+                  type="text"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onCompositionStart={() => { isComposingRef.current = true; }}
+                  onCompositionEnd={() => { isComposingRef.current = false; }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && !isComposingRef.current) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  placeholder={locale === 'zh' ? '输入指令，如：提取表格数据 / 合并 PDF / 写摘要' : 'Enter command...'}
+                  disabled={isProcessing}
+                  className="flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-50 py-2 px-2 text-[var(--foreground)] placeholder-gray-400"
+                />
+
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={(!userInput.trim() && queuedFiles.length === 0) || isProcessing}
+                  className="flex-shrink-0 px-5 py-2 text-sm font-bold rounded-xl transition-all nm-button-primary disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  {isProcessing ? '...' : locale === 'zh' ? '发送' : 'Send'}
+                </button>
+              </div>
+            </div>
+
           </div>
+
         </div>
       </main>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileSelect}
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.json,.xml,.html"
+      />
     </div>
   );
 }
