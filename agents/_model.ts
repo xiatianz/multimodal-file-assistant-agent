@@ -109,7 +109,8 @@ if (typeof process !== 'undefined' && !proxyStarted) {
             model: anthropicPayload.model,
             messages: openaiMessages,
             tools: openaiTools,
-            stream: anthropicPayload.stream ?? true
+            stream: anthropicPayload.stream ?? true,
+            stream_options: (anthropicPayload.stream ?? true) ? { include_usage: true } : undefined
           };
           
           let targetBase = config.url || 'https://api.openai.com/v1';
@@ -158,6 +159,8 @@ if (typeof process !== 'undefined' && !proxyStarted) {
             const activeToolIds = new Map<number, string>();
             const activeToolNames = new Map<number, string>();
             const activeToolInputs = new Map<number, string>();
+            let inputTokens = 0;
+            let outputTokens = 0;
             
             proxyRes.on('data', (chunk) => {
               buffer += chunk.toString('utf-8');
@@ -172,8 +175,14 @@ if (typeof process !== 'undefined' && !proxyStarted) {
                 
                 try {
                   const chunkObj = JSON.parse(cleanLine.slice(6));
+                  if (chunkObj.usage) {
+                    inputTokens = chunkObj.usage.prompt_tokens || 0;
+                    outputTokens = chunkObj.usage.completion_tokens || 0;
+                  }
                   const delta = chunkObj.choices?.[0]?.delta;
-                  if (!delta) continue;
+                  if (!delta) {
+                    continue;
+                  }
                   
                   if (delta.content) {
                     if (!textBlockStarted) {
@@ -246,7 +255,10 @@ if (typeof process !== 'undefined' && !proxyStarted) {
               const msgDelta = {
                 type: "message_delta",
                 delta: { stop_reason: startedToolIndexes.size > 0 ? "tool_use" : "end_turn", stop_sequence: null },
-                usage: { output_tokens: 0 }
+                usage: { 
+                  input_tokens: inputTokens,
+                  output_tokens: outputTokens
+                }
               };
               res.write(`event: message_delta\ndata: ${JSON.stringify(msgDelta)}\n\n`);
               res.write(`event: message_stop\ndata: ${JSON.stringify({ type: "message_stop" })}\n\n`);
