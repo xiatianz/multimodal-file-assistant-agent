@@ -68,10 +68,12 @@ if (typeof process !== 'undefined' && !proxyStarted) {
                   } else if (Array.isArray(block.content)) {
                     contentStr = block.content.map((b: any) => b.text || "").join("\n");
                   }
+                  if (!contentStr || !contentStr.trim()) {
+                    contentStr = "Tool executed successfully with no output.";
+                  }
                   openaiMessages.push({
                     role: 'tool',
                     tool_call_id: block.tool_use_id,
-                    name: block.name || 'tool',
                     content: contentStr
                   });
                 }
@@ -117,11 +119,14 @@ if (typeof process !== 'undefined' && !proxyStarted) {
           const targetUrlObj = new URL(targetUrl);
           const requestModule = targetUrlObj.protocol === 'https:' ? https : http;
           
+          const payloadBuffer = Buffer.from(JSON.stringify(openaiPayload), 'utf-8');
+          
           const proxyReq = requestModule.request(targetUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${config.key}`
+              'Authorization': `Bearer ${config.key}`,
+              'Content-Length': payloadBuffer.length
             }
           }, (proxyRes) => {
             res.writeHead(proxyRes.statusCode || 200, {
@@ -255,7 +260,7 @@ if (typeof process !== 'undefined' && !proxyStarted) {
             res.end();
           });
           
-          proxyReq.write(JSON.stringify(openaiPayload));
+          proxyReq.write(payloadBuffer);
           proxyReq.end();
           
         } catch(err) {
