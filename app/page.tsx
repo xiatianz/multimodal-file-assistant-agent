@@ -933,9 +933,9 @@ export default function Home() {
               <div className="space-y-3.5 w-full">
                 {!hasConversation ? (
                   /* ─── Welcome Screen ─── */
-                  <div className="py-10 px-4 flex flex-col items-center justify-center text-center h-full max-w-2xl mx-auto">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-[var(--accent-subtle)] to-transparent border border-[var(--accent)]/15 mb-5 ${isDark ? 'animate-breathe' : ''}`}>
-                      <svg className="w-7 h-7 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="py-4 md:py-10 px-4 flex flex-col items-center justify-center text-center h-full max-w-2xl mx-auto">
+                    <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center bg-gradient-to-br from-[var(--accent-subtle)] to-transparent border border-[var(--accent)]/15 mb-5 ${isDark ? 'animate-breathe' : ''}`}>
+                      <svg className="w-5 h-5 md:w-7 md:h-7 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                       </svg>
                     </div>
@@ -943,17 +943,17 @@ export default function Home() {
                     <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
                     {locale === 'zh' ? '上传文件，开始处理' : 'Upload files to get started'}
                   </h2>
-                    <p className="text-base text-[var(--text-secondary)] mb-5 leading-relaxed max-w-lg">
+                    <p className="text-base text-[var(--text-secondary)] mb-4 leading-relaxed max-w-lg text-[13px] md:text-[15px]">
                       {locale === 'zh'
                         ? '支持 PDF、Word、Excel、CSV、图片和文本。上传后可以直接让 AI 做摘要、转换、合并或整理。'
                         : 'Supports PDF, Word, Excel, CSV, images, and text. Upload a file and ask for summaries, conversions, merges, or cleanup.'}
                     </p>
-                    <p className="text-xs text-[var(--text-tertiary)] mb-7 leading-relaxed max-w-md">
+                    <p className="text-xs text-[var(--text-tertiary)] mb-6 leading-relaxed max-w-md hidden md:block">
                       {uploadRulesText}
                     </p>
 
                     {/* Quick Command Cards */}
-                    <div className="w-full space-y-3 text-left">
+                    <div className="w-full space-y-2 md:space-y-3 text-left">
                       <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest pl-1">
                         {locale === 'zh' ? '快速指令' : 'Quick Actions'}
                       </p>
@@ -988,7 +988,7 @@ export default function Home() {
                             key={idx}
                             onClick={() => sendMessage(item.cmd)}
                             disabled={isProcessing}
-                            className="p-3.5 text-left rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent-subtle)] transition-all group flex items-start gap-3 disabled:opacity-50"
+                            className="p-2.5 md:p-3.5 text-left rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent-subtle)] transition-all group flex items-start gap-3 disabled:opacity-50"
                           >
                             <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent-subtle)] text-[var(--accent)] flex-shrink-0 group-hover:bg-[var(--accent)] group-hover:text-white transition-all">
                               {item.icon}
@@ -1172,16 +1172,13 @@ export default function Home() {
                   )}
                 </div>
               )}
-              <p className="mb-2 text-xs text-[var(--text-tertiary)] px-0.5">
-                {uploadRulesText}
-                {queuedFiles.length > 0 && (
-                  <span className="ml-2">
-                    {locale === 'zh'
-                      ? `当前待处理 ${queuedFiles.length} 个文件，共 ${humanFileSize(queuedBytes)}。`
-                      : `${queuedFiles.length} queued file(s), ${humanFileSize(queuedBytes)} total.`}
-                  </span>
-                )}
-              </p>
+              {queuedFiles.length > 0 && (
+                <p className="mb-2 text-xs text-[var(--text-tertiary)] px-1 font-medium">
+                  {locale === 'zh'
+                    ? `待处理 ${queuedFiles.length} 个文件 (${humanFileSize(queuedBytes)})`
+                    : `${queuedFiles.length} queued file(s) (${humanFileSize(queuedBytes)})`}
+                </p>
+              )}
 
               {/* Input bar */}
               <div className="flex items-end gap-2 rounded-xl p-1.5 nm-pressed glow-accent border border-[var(--border-subtle)]">
