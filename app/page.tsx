@@ -689,7 +689,7 @@ export default function Home() {
 
   return (
     <div
-      className="h-screen flex flex-col app-backdrop text-[var(--foreground)]"
+      className="h-[100dvh] flex flex-col app-backdrop text-[var(--foreground)]"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -714,7 +714,7 @@ export default function Home() {
           onClick={resetToHome}
           aria-label={locale === 'zh' ? '回到初始页并开始新会话' : 'Return home and start a new session'}
           title={locale === 'zh' ? '回到初始页' : 'Return home'}
-          className="flex items-center gap-3 rounded-xl -ml-1 px-1 py-1 text-left transition-colors hover:bg-[var(--bg-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+          className="flex items-center gap-3 rounded-xl -ml-1 text-left transition-colors hover:bg-[var(--bg-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
         >
           <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#E50914] to-[#9C070F] flex-shrink-0 shadow-[0_2px_8px_rgba(229,9,20,0.3)]">
             <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -743,7 +743,7 @@ export default function Home() {
                 <span className="text-lg font-black tracking-tight text-[var(--brand)] font-sans">DOC</span>
                 <span className="text-lg font-black tracking-tight text-[var(--text-primary)] font-sans ml-0.5">FLIX</span>
               </h1>
-              <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/15 uppercase tracking-wider">
+              <span className="hidden md:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/15 uppercase tracking-wider">
                 {locale === 'zh' ? 'AI' : 'AI'}
               </span>
               <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'}`} />
@@ -758,17 +758,17 @@ export default function Home() {
           )}
           <button
             onClick={() => setWorkspaceOpen(!workspaceOpen)}
-            className={`lg:hidden min-h-9 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all nm-button ${workspaceOpen ? 'active text-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}
+            className={`lg:hidden min-h-10 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all nm-button ${workspaceOpen ? 'active text-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
             {files.length > 0 ? `${files.length}` : locale === 'zh' ? '文件' : 'Files'}
           </button>
           <button onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-            className="min-h-9 w-9 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-secondary)] text-xs font-bold">
+            className="min-h-10 min-w-10 w-10 h-10 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-secondary)] text-xs font-bold">
             {locale === 'zh' ? 'EN' : '中'}
           </button>
           <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="min-h-9 w-9 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-secondary)]">
+            className="min-h-10 min-w-10 w-10 h-10 flex items-center justify-center rounded-lg transition-all nm-button text-[var(--text-secondary)]">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isDark
                 ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -790,11 +790,16 @@ export default function Home() {
               : 'hidden lg:flex'
           } lg:col-span-4 xl:col-span-3 flex-col nm-flat rounded-2xl overflow-hidden h-full`}>
 
+            
             {/* Sidebar header */}
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border-subtle)] flex-shrink-0">
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+                <svg className="w-4 h-4 text-[var(--accent)] lg:block hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+                <button onClick={() => setWorkspaceOpen(false)} className="lg:hidden w-8 h-8 -ml-2 flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-inset)] rounded-lg transition-colors">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
                 <h2 className="text-sm font-bold text-[var(--text-primary)]">
+
                   {locale === 'zh' ? '文件空间' : 'Workspace'}
                 </h2>
                 {files.length > 0 && (
@@ -882,7 +887,7 @@ export default function Home() {
 
                         <button
                           onClick={() => { setFiles((prev) => prev.filter((f) => f.id !== file.id)); sentFileIds.current.delete(file.id); }}
-                          className="p-1 rounded-md text-[var(--text-tertiary)] hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
+                          className="w-8 h-8 flex items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-red-500 hover:bg-red-500/10 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1145,18 +1150,18 @@ export default function Home() {
             </div>
 
             {/* Bottom Input Area */}
-            <div className="px-5 pb-4 pt-2 border-t border-[var(--border-subtle)] flex-shrink-0">
+            <div className="px-3 sm:px-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 pt-2 border-t border-[var(--border-subtle)] flex-shrink-0">
 
               {/* Queued file chips */}
               {queuedFiles.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-2.5 px-0.5">
                   {queuedFiles.map((f) => (
                     <span key={f.id}
-                      className="inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-md text-[11px] font-semibold bg-[var(--accent-subtle)] text-[var(--accent)]">
+                      className="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-md text-[12px] font-semibold bg-[var(--accent-subtle)] text-[var(--accent)]">
                       <span>{getFileIcon(f.type)}</span>
                       <span className="max-w-[120px] truncate">{f.name}</span>
                       <button onClick={() => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
-                        className="w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-[var(--accent)]/20 transition-colors">×</button>
+                        className="w-6 h-6 -mr-1 rounded-full flex items-center justify-center hover:bg-[var(--accent)]/20 transition-colors text-base font-normal">×</button>
                     </span>
                   ))}
                   {queuedFiles.length > 1 && (

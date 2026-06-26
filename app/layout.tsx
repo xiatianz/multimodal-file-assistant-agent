@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="h-screen overflow-hidden antialiased">
+      <body className="h-[100dvh] overflow-hidden antialiased">
         <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
